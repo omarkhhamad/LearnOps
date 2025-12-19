@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LearnOps – ER Diagram</title>
+
+  <!-- Mermaid CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "default"
+    });
+  </script>
+
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #f4f6f8;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .mermaid {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>LearnOps – Database ER Diagram</h1>
+
+  <div class="mermaid">
+erDiagram
+
+    STUDENT ||--o{ ENROLLMENT : enrolls
+    CLASSGROUP ||--o{ ENROLLMENT : has
+    COURSE ||--o{ CLASSGROUP : contains
+    INSTRUCTOR ||--o{ CLASSGROUP : teaches
+
+    ENROLLMENT ||--o{ PAYMENT : pays
+    ENROLLMENT ||--o{ ATTENDANCE : records
+    ENROLLMENT ||--|| CERTIFICATE : issues
+
+    CLASSGROUP ||--o{ EXAM : has
+    EXAM ||--o{ EXAMRESULT : produces
+    ENROLLMENT ||--o{ EXAMRESULT : receives
+
+    STUDENT {
+      int StudentId PK
+      string FullName
+      string Phone
+      string Email
+      date DateOfBirth
+      date CreatedAt
+    }
+
+    COURSE {
+      int CourseId PK
+      string Title
+      string Description
+      int DurationWeeks
+      decimal Price
+      int MaxStudents
+    }
+
+    INSTRUCTOR {
+      int InstructorId PK
+      string FullName
+      string Phone
+      string Email
+      decimal HourlyRate
+    }
+
+    CLASSGROUP {
+      int GroupId PK
+      string Name
+      string Room
+      string Days
+      string Time
+      date StartDate
+      date EndDate
+      int CourseId FK
+      int InstructorId FK
+    }
+
+    ENROLLMENT {
+      int EnrollmentId PK
+      date EnrollmentDate
+      string Status
+      int StudentId FK
+      int GroupId FK
+    }
+
+    PAYMENT {
+      int PaymentId PK
+      decimal Amount
+      date PaymentDate
+      string Method
+      int EnrollmentId FK
+    }
+
+    ATTENDANCE {
+      int AttendanceId PK
+      date SessionDate
+      string Status
+      int EnrollmentId FK
+    }
+
+    CERTIFICATE {
+      int CertificateId PK
+      date IssuedDate
+      int EnrollmentId FK
+    }
+
+    EXAM {
+      int ExamId PK
+      string Title
+      date ExamDate
+      int MaxScore
+      int GroupId FK
+    }
+
+    EXAMRESULT {
+      int ResultId PK
+      int Score
+      string Result
+      int ExamId FK
+      int EnrollmentId FK
+    }
+  </div>
+
+</body>
+</html>

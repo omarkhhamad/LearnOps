@@ -12,6 +12,6 @@
 
         // Navigation Properties
         public ClassGroup ClassGroup { get; set; } = null!;
-        public ICollection<ExamResult> ExamResults { get; set; }
+        public ICollection<ExamResult> ExamResults { get; set; } = new List<ExamResult>();
     }
 }

@@ -182,9 +182,6 @@
             "projectReferences": {
               "E:\\ITI\\Review\\LearnOps\\Application\\Application.csproj": {
                 "projectPath": "E:\\ITI\\Review\\LearnOps\\Application\\Application.csproj"
-              },
-              "E:\\ITI\\Review\\LearnOps\\Domain\\Domain.csproj": {
-                "projectPath": "E:\\ITI\\Review\\LearnOps\\Domain\\Domain.csproj"
               }
             }
           }
@@ -207,23 +204,11 @@
           "dependencies": {
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[8.0.0, )"
-            },
-            "Microsoft.EntityFrameworkCore.Design": {
-              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
-              "suppressParent": "All",
-              "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[8.0.10, )"
             },
             "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
-              "version": "[8.0.0, )"
-            },
-            "Microsoft.EntityFrameworkCore.Tools": {
-              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
-              "suppressParent": "All",
-              "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[8.0.10, )"
             }
           },
           "imports": [

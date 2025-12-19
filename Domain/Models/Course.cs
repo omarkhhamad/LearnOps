@@ -10,6 +10,6 @@
         public int MaxStudents { get; set; }
 
         // Navigation Properties
-        public ICollection<ClassGroup> ClassGroups { get; set; } 
+        public ICollection<ClassGroup> ClassGroups { get; set; }= new List<ClassGroup>();
     }
 }

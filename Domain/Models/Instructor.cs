@@ -8,7 +8,7 @@
         public string? Email { get; set; }
         public decimal HourlyRate { get; set; }
         // Navigation Properties
-        public ICollection<ClassGroup> ClassGroups { get; set; }
+        public ICollection<ClassGroup> ClassGroups { get; set; }= new List<ClassGroup>();
 
     }
 }
