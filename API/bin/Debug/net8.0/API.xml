@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>API</name>
+    </assembly>
+    <members>
+        <member name="M:API.Controllers.StudentController.GetAllStudents(System.String,System.Int32,System.Int32)">
+            <summary>
+            Get all students
+            </summary>
+            <remarks>
+            Returns a list of all students in the system.
+            </remarks>
+            <response code="200">Students retrieved successfully</response>
+        </member>
+        <member name="M:API.Controllers.StudentController.GetStudentById(System.Int32)">
+            <summary>
+            Get student by ID
+            </summary>
+            <param name="id">Student ID</param>
+            <response code="200">Student found</response>
+            <response code="404">Student not found</response>
+        </member>
+        <member name="M:API.Controllers.StudentController.UpdateStudent(System.Int32,Application.DTOs.Student.AddUpdateStudentDto)">
+            <summary>
+            Update existing student
+            </summary>
+            <param name="id">Student ID</param>
+            <param name="studentDto">Updated student data</param>
+            <response code="200">Student updated successfully</response>
+            <response code="404">Student not found</response>
+        </member>
+        <member name="M:API.Controllers.StudentController.AddStudent(Application.DTOs.Student.AddUpdateStudentDto)">
+            <summary>
+            Create a new student
+            </summary>
+            <param name="studentDto">Student data</param>
+            <response code="201">Student created successfully</response>
+            <response code="400">Invalid input</response>
+        </member>
+        <member name="M:API.Controllers.StudentController.DeleteStudent(System.Int32)">
+            <summary>
+            Delete student
+            </summary>
+            <param name="id">Student ID</param>
+            <response code="200">Student deleted successfully</response>
+            <response code="404">Student not found</response>
+        </member>
+    </members>
+</doc>
