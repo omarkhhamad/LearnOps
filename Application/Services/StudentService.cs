@@ -20,10 +20,33 @@ namespace Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Result<IEnumerable<StudentDto>>> GetAllStudents()
+        //public async Task<Result<IEnumerable<StudentDto>>> GetAllStudents()
+        //{
+        //    var students = await _unitOfWork.Students.GetAllAsync();
+        //    var dtos = students.Select(s => new StudentDto
+        //    {
+        //        StudentId = s.StudentId,
+        //        FullName = s.FullName,
+        //        Email = s.Email,
+        //        Phone = s.Phone,
+        //        DateOfBirth = s.DateOfBirth
+        //    });
+
+        //    return Result<IEnumerable<StudentDto>>.Success(dtos);
+        //}
+        public async Task<Result<PagedResult<StudentDto>>> GetAllStudents(string? search,int page=1,int pageSize=10)
         {
             var students = await _unitOfWork.Students.GetAllAsync();
-            var dtos = students.Select(s => new StudentDto
+           if(!string.IsNullOrEmpty(search))
+            {
+                students = students.Where(s => s.FullName.Contains(search, StringComparison.OrdinalIgnoreCase) || 
+                (s.Email != null && s.Email.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                s.Phone.Contains(search, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+            var totalRecords = students.Count();
+            var totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
+            var pagedStudents = students.Skip((page - 1) * pageSize).Take(pageSize);
+            var dtos = pagedStudents.Select(s => new StudentDto
             {
                 StudentId = s.StudentId,
                 FullName = s.FullName,
@@ -31,9 +54,18 @@ namespace Application.Services
                 Phone = s.Phone,
                 DateOfBirth = s.DateOfBirth
             });
+            var pagedResult = new PagedResult<StudentDto>
+            {
+                Items = dtos,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalRecords = totalRecords
+            };
 
-            return Result<IEnumerable<StudentDto>>.Success(dtos);
+            return Result<PagedResult<StudentDto>>.Success(pagedResult, 200, $"Page {page} of {pagedResult.TotalPages}, Total Records: {totalRecords}");
         }
+
+
 
         public async Task<Result<StudentDto>> GetStudentById(int id)
         {
@@ -49,25 +81,35 @@ namespace Application.Services
             };
             return Result<StudentDto>.Success(dto);
         }
-
-        public async Task<Result<string>> AddStudent(AddUpdateStudentDto studentDto)
+        public async Task<Result<StudentDto>> AddStudent(AddUpdateStudentDto studentDto)
         {
-            var student = new Student { 
-                FullName = studentDto.FullName , 
-                Email=studentDto.Email,
-                Phone=studentDto.Phone,
-                DateOfBirth=studentDto.DateOfBirth,
-                CreatedAt=DateTime.UtcNow
+            var student = new Student
+            {
+                FullName = studentDto.FullName,
+                Email = studentDto.Email,
+                Phone = studentDto.Phone,
+                DateOfBirth = studentDto.DateOfBirth,
+                CreatedAt = DateTime.UtcNow
             };
             await _unitOfWork.Students.AddAsync(student);
             await _unitOfWork.CommitAsync();
-            return Result<string>.Success(null, 200, "Student added successfully");
+
+            var dto = new StudentDto
+            {
+                StudentId = student.StudentId,
+                FullName = student.FullName,
+                Email = student.Email,
+                Phone = student.Phone,
+                DateOfBirth = student.DateOfBirth
+            };
+
+            return Result<StudentDto>.Success(dto, 201, "Student added successfully");
         }
 
-        public async Task<Result<string>> UpdateStudent(int id, AddUpdateStudentDto studentDto)
+        public async Task<Result<StudentDto>> UpdateStudent(int id, AddUpdateStudentDto studentDto)
         {
             var student = await _unitOfWork.Students.GetByIdAsync(id);
-            if (student == null) return Result<string>.Fail("Student not found", 404);
+            if (student == null) return Result<StudentDto>.Fail("Student not found", 404);
 
             student.FullName = studentDto.FullName;
             student.Email = studentDto.Email;
@@ -77,17 +119,29 @@ namespace Application.Services
 
             _unitOfWork.Students.Update(student);
             await _unitOfWork.CommitAsync();
-            return Result<string>.Success(null, 200, "Student updated successfully");
+
+            var dto = new StudentDto
+            {
+                StudentId = student.StudentId,
+                FullName = student.FullName,
+                Email = student.Email,
+                Phone = student.Phone,
+                DateOfBirth = student.DateOfBirth
+            };
+
+            return Result<StudentDto>.Success(dto, 200, "Student updated successfully");
         }
 
-        public async Task<Result<string>> DeleteStudent(int id)
+        public async Task<Result<bool>> DeleteStudent(int id)
         {
             var student = await _unitOfWork.Students.GetByIdAsync(id);
-            if (student == null) return Result<string>.Fail("Student not found", 404);
+            if (student == null) return Result<bool>.Fail("Student not found", 404);
+
             _unitOfWork.Students.Delete(student);
             await _unitOfWork.CommitAsync();
-            return Result<string>.Success(null, 200, "Student deleted successfully");
+            return Result<bool>.Success(true, 200, "Student deleted successfully");
         }
+
     }
 
 
