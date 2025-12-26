@@ -223,6 +223,60 @@
           }
         }
       }
+    },
+    "/api/Student/bulk-delete": {
+      "delete": {
+        "tags": [
+          "Student"
+        ],
+        "summary": "Deletes multiple students by their IDs.",
+        "requestBody": {
+          "description": "A list of student IDs to be deleted.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Students deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BooleanResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or empty student IDs list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No students found with the provided IDs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringResult"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

@@ -90,6 +90,23 @@ namespace API.Controllers
             var result = await _studentService.DeleteStudent(id);
             return ToActionResult(result); 
         }
+        /// <summary>
+        /// Deletes multiple students by their IDs.
+        /// </summary>
+        /// <param name="ids">A list of student IDs to be deleted.</param>
+        /// <response code="200">Students deleted successfully.</response>
+        /// <response code="400">Invalid or empty student IDs list.</response>
+        /// <response code="404">No students found with the provided IDs.</response>
+        [HttpDelete("bulk-delete")]
+        [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(Result<string>), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> BulkDelete([FromBody] List<int> ids)
+        {
+            var result = await _studentService.DeleteStudents(ids);
+            return ToActionResult(result);
+        }
+
 
 
     }

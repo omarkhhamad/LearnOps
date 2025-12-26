@@ -37,5 +37,18 @@ namespace Infrastructure.Persistence.Common.Repositories
 
         public async Task<Student> GetByEmailAsync(string email)
             => await _context.Students.FirstOrDefaultAsync(s => s.Email == email);
+
+        public async Task<IEnumerable<Student>> GetByIdsAsync(List<int> ids)
+        {
+            return await _context.Students
+                .Where(s => ids.Contains(s.StudentId))
+                .ToListAsync();
+        }
+
+        public void DeleteRange(IEnumerable<Student> students)
+        {
+            _context.Students.RemoveRange(students);
+        }
+
     }
 }

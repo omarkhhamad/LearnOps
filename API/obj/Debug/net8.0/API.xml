@@ -46,5 +46,14 @@
             <response code="200">Student deleted successfully</response>
             <response code="404">Student not found</response>
         </member>
+        <member name="M:API.Controllers.StudentController.BulkDelete(System.Collections.Generic.List{System.Int32})">
+            <summary>
+            Deletes multiple students by their IDs.
+            </summary>
+            <param name="ids">A list of student IDs to be deleted.</param>
+            <response code="200">Students deleted successfully.</response>
+            <response code="400">Invalid or empty student IDs list.</response>
+            <response code="404">No students found with the provided IDs.</response>
+        </member>
     </members>
 </doc>

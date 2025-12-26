@@ -142,6 +142,23 @@ namespace Application.Services
             return Result<bool>.Success(true, 200, "Student deleted successfully");
         }
 
+        public async Task<Result<bool>> DeleteStudents(List<int> ids)
+        {
+            if (ids == null || !ids.Any())
+                return Result<bool>.Fail("No students selected", 400);
+
+            var students = await _unitOfWork.Students.GetByIdsAsync(ids);
+
+            if (!students.Any())
+                return Result<bool>.Fail("No students found", 404);
+
+            _unitOfWork.Students.DeleteRange(students);
+            await _unitOfWork.CommitAsync();
+
+            return Result<bool>.Success(true, 200, $"{students.Count()} students deleted successfully");
+        }
+
+
     }
 
 
