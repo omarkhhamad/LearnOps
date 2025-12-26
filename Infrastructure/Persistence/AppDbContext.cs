@@ -26,6 +26,12 @@ namespace Infrastructure.Persistence
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Student>()
+              .HasQueryFilter(s => !s.IsDeleted);
+
+            modelBuilder.Entity<Enrollment>()
+               .HasQueryFilter(e => !e.IsDeleted);
+
 
             modelBuilder.Entity<Course>()
                 .Property(c => c.Price)

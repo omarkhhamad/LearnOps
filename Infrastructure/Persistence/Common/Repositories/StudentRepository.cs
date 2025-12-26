@@ -45,9 +45,27 @@ namespace Infrastructure.Persistence.Common.Repositories
                 .ToListAsync();
         }
 
+        //public void DeleteRange(IEnumerable<Student> students)
+        //{
+        //    _context.Students.RemoveRange(students);
+        //}
+
+        public void Delete(Student student)
+        {
+            student.IsDeleted = true;
+            student.DeletedAt = DateTime.UtcNow;
+            _context.Students.Update(student);
+        }
+
         public void DeleteRange(IEnumerable<Student> students)
         {
-            _context.Students.RemoveRange(students);
+            foreach (var student in students)
+            {
+                student.IsDeleted = true;
+                student.DeletedAt = DateTime.UtcNow;
+            }
+
+            _context.Students.UpdateRange(students);
         }
 
     }
