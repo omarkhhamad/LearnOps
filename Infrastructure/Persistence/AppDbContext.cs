@@ -37,6 +37,12 @@ namespace Infrastructure.Persistence
             modelBuilder.Entity<Course>()
                 .HasQueryFilter(c => !c.IsDeleted);
 
+            modelBuilder.Entity<Instructor>()
+                .HasQueryFilter(i => !i.IsDeleted);
+
+            modelBuilder.Entity<ClassGroup>()
+                .HasQueryFilter(a => !a.IsDeleted);
+
             modelBuilder.Entity<Course>()
                 .Property(c => c.Price)
                 .HasPrecision(18, 2);

@@ -12,14 +12,17 @@ namespace Application.UnitOfWork
 
         public IStudentRepository Students { get; }
         public ICourseRepository Courses { get; }
+        public IInstructorRepository Instructors { get; }
 
         public UnitOfWork(AppDbContext context,
                             IStudentRepository studentRepo, 
-                            ICourseRepository courseRepo)
+                            ICourseRepository courseRepo,
+                            IInstructorRepository instructors)
         {
             _context = context;
             Students = studentRepo;
             Courses = courseRepo;
+            Instructors = instructors;
         }
 
         public async Task<int> CommitAsync()

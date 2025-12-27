@@ -1,6 +1,6 @@
 ﻿namespace Domain.Models
 {
-    public class Instructor
+    public class Instructor:BaseEntity
     {
         public int InstructorId { get; set; }
         public string FullName { get; set; } = null!;

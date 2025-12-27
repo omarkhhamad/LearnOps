@@ -58,6 +58,63 @@
             <response code="400">Invalid or empty list of IDs</response>
             <response code="404">No courses found for the provided IDs</response>
         </member>
+        <member name="M:API.Controllers.InstructorController.GetAllInstructors(System.String,System.Int32,System.Int32)">
+            <summary>
+            Get all instructors
+            </summary>
+            <remarks>
+            Returns a paginated list of instructors with optional search by name or phone.
+            </remarks>
+            <response code="200">Instructors retrieved successfully</response>
+        </member>
+        <member name="M:API.Controllers.InstructorController.GetInstructorById(System.Int32)">
+            <summary>
+            Get instructor by ID
+            </summary>
+            <param name="id">Instructor ID</param>
+            <response code="200">Instructor found</response>
+            <response code="404">Instructor not found</response>
+        </member>
+        <member name="M:API.Controllers.InstructorController.AddInstructor(Application.DTOs.Instructor.AddUpdateInstructorDto)">
+            <summary>
+            Create a new instructor
+            </summary>
+            <param name="instructorDto">Instructor data</param>
+            <response code="201">Instructor created successfully</response>
+            <response code="400">Invalid input</response>
+        </member>
+        <member name="M:API.Controllers.InstructorController.UpdateInstructor(System.Int32,Application.DTOs.Instructor.AddUpdateInstructorDto)">
+            <summary>
+            Update existing instructor
+            </summary>
+            <param name="id">Instructor ID</param>
+            <param name="instructorDto">Updated instructor data</param>
+            <response code="200">Instructor updated successfully</response>
+            <response code="404">Instructor not found</response>
+        </member>
+        <member name="M:API.Controllers.InstructorController.DeleteInstructor(System.Int32)">
+            <summary>
+            Delete instructor
+            </summary>
+            <remarks>
+            Performs a soft delete for the instructor.
+            </remarks>
+            <param name="id">Instructor ID</param>
+            <response code="200">Instructor deleted successfully</response>
+            <response code="404">Instructor not found</response>
+        </member>
+        <member name="M:API.Controllers.InstructorController.BulkDelete(System.Collections.Generic.List{System.Int32})">
+            <summary>
+            Deletes multiple instructors by their IDs
+            </summary>
+            <remarks>
+            Performs a soft delete for multiple instructors.
+            </remarks>
+            <param name="ids">A list of instructor IDs to be deleted</param>
+            <response code="200">Instructors deleted successfully</response>
+            <response code="400">Invalid or empty instructor IDs list</response>
+            <response code="404">No instructors found with the provided IDs</response>
+        </member>
         <member name="M:API.Controllers.StudentController.GetAllStudents(System.String,System.Int32,System.Int32)">
             <summary>
             Get all students

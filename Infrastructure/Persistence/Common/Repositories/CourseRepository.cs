@@ -11,14 +11,14 @@ namespace Infrastructure.Persistence.Common.Repositories
 {
     public class CourseRepository :BaseRepository<Course,int>, ICourseRepository
     {
-        private readonly AppDbContext _context;
+        private new readonly AppDbContext _context;
 
         public CourseRepository(AppDbContext context) : base(context)
         {
             _context = context;
         }
 
-        public void Delete(Course course)
+        public new void Delete(Course course)
         {
             course.IsDeleted = true;
             course.DeletedAt = DateTime.UtcNow;

@@ -10,7 +10,7 @@ namespace Infrastructure.Persistence.Common.Repositories
 {
     public class StudentRepository : BaseRepository<Student, int>, IStudentRepository
     {
-        private readonly AppDbContext _context;
+        private new readonly AppDbContext _context;
 
         public StudentRepository(AppDbContext context) : base(context)
         {
@@ -50,7 +50,7 @@ namespace Infrastructure.Persistence.Common.Repositories
         //    _context.Students.RemoveRange(students);
         //}
 
-        public void Delete(Student student)
+        public new void Delete(Student student)
         {
             student.IsDeleted = true;
             student.DeletedAt = DateTime.UtcNow;

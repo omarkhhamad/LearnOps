@@ -2,7 +2,7 @@
 
 namespace Domain.Models
 {
-    public class ClassGroup
+    public class ClassGroup: BaseEntity
     {
         [Key]
         public int GroupId { get; set; }

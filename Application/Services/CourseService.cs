@@ -27,7 +27,7 @@ namespace Application.Services
                 Price = courseDto.Price,
                 MaxStudents = courseDto.MaxStudents
             };
-            _unitOfWork.Courses.AddAsync(course);
+            await _unitOfWork.Courses.AddAsync(course);
             await _unitOfWork.CommitAsync();
             var resultDto = new CourseDto
             {
