@@ -11,11 +11,15 @@ namespace Application.UnitOfWork
         private readonly AppDbContext _context;
 
         public IStudentRepository Students { get; }
+        public ICourseRepository Courses { get; }
 
-        public UnitOfWork(AppDbContext context,IStudentRepository studentRepo)
+        public UnitOfWork(AppDbContext context,
+                            IStudentRepository studentRepo, 
+                            ICourseRepository courseRepo)
         {
             _context = context;
             Students = studentRepo;
+            Courses = courseRepo;
         }
 
         public async Task<int> CommitAsync()

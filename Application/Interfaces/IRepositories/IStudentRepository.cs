@@ -12,13 +12,7 @@ namespace Application.Interfaces.IRepositories
         Task<Student> GetStudentWithCoursesAsync(int studentId);
         Task<List<Student>> GetAllStudentsWithCoursesAsync();
         Task<Student> GetByEmailAsync(string email);
-        Task<IEnumerable<Student>> GetAllAsync();
-        Task<Student?> GetByIdAsync(int id);
         Task<IEnumerable<Student>> GetByIdsAsync(List<int> ids);
-
-        Task AddAsync(Student student);
-        void Update(Student student);
-        void Delete(Student student);
         void DeleteRange(IEnumerable<Student> students);
 
     }

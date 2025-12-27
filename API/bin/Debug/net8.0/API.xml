@@ -4,6 +4,60 @@
         <name>API</name>
     </assembly>
     <members>
+        <member name="M:API.Controllers.CourseController.GetAllCourses(System.String,System.Int32,System.Int32)">
+            <summary>
+            Get all courses
+            </summary>
+            <remarks>
+            Returns a paginated list of all courses in the system. You can search by title or description.
+            </remarks>
+            <param name="search">Optional search term to filter courses</param>
+            <param name="page">Page number (default is 1)</param>
+            <param name="pageSize">Number of items per page (default is 10)</param>
+            <response code="200">Courses retrieved successfully</response>
+        </member>
+        <member name="M:API.Controllers.CourseController.GetCourseById(System.Int32)">
+            <summary>
+            Get course by ID
+            </summary>
+            <param name="id">Course ID</param>
+            <response code="200">Course found</response>
+            <response code="404">Course not found</response>
+        </member>
+        <member name="M:API.Controllers.CourseController.AddCourse(Application.DTOs.Course.AddUpdateCourseDto)">
+            <summary>
+            Create a new course
+            </summary>
+            <param name="courseDto">Course data</param>
+            <response code="201">Course created successfully</response>
+            <response code="400">Invalid input</response>
+        </member>
+        <member name="M:API.Controllers.CourseController.UpdateCourse(System.Int32,Application.DTOs.Course.AddUpdateCourseDto)">
+            <summary>
+            Update an existing course
+            </summary>
+            <param name="id">Course ID</param>
+            <param name="courseDto">Updated course data</param>
+            <response code="200">Course updated successfully</response>
+            <response code="404">Course not found</response>
+        </member>
+        <member name="M:API.Controllers.CourseController.DeleteCourse(System.Int32)">
+            <summary>
+            Delete a course by ID
+            </summary>
+            <param name="id">Course ID</param>
+            <response code="200">Course deleted successfully</response>
+            <response code="404">Course not found</response>
+        </member>
+        <member name="M:API.Controllers.CourseController.BulkDeleteCourses(System.Collections.Generic.List{System.Int32})">
+            <summary>
+            Delete multiple courses by their IDs
+            </summary>
+            <param name="ids">List of course IDs to delete</param>
+            <response code="200">Courses deleted successfully</response>
+            <response code="400">Invalid or empty list of IDs</response>
+            <response code="404">No courses found for the provided IDs</response>
+        </member>
         <member name="M:API.Controllers.StudentController.GetAllStudents(System.String,System.Int32,System.Int32)">
             <summary>
             Get all students
