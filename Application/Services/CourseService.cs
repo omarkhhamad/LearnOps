@@ -1,46 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Application.DTOs.Course;
 using Application.Interfaces.IServices;
 using Application.Result;
 using Application.UnitOfWork;
+using AutoMapper;
 namespace Application.Services
 {
     public class CourseService : ICourseService
     {
         private readonly IUnitOfWork _unitOfWork;
-        public CourseService(IUnitOfWork unitOfWork)
+        private readonly IMapper _mapper;
+        public CourseService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         public async Task<Result<CourseDto>> AddCourse(AddUpdateCourseDto courseDto)
         {
-            var course = new Domain.Models.Course
-            {
-                Title = courseDto.Title,
-                Description = courseDto.Description,
-                DurationWeeks = courseDto.DurationWeeks,
-                Price = courseDto.Price,
-                MaxStudents = courseDto.MaxStudents
-            };
+            var course = _mapper.Map<Domain.Models.Course>(courseDto);
             await _unitOfWork.Courses.AddAsync(course);
             await _unitOfWork.CommitAsync();
-            var resultDto = new CourseDto
-            {
-                CourseId = course.CourseId,
-                Title = course.Title,
-                Description = course.Description,
-                DurationWeeks = course.DurationWeeks,
-                Price = course.Price,
-                MaxStudents = course.MaxStudents
-            };
-            return Result<CourseDto>.Success(resultDto, 201, "Course created successfully");
-        }
 
+            var dto = _mapper.Map<CourseDto>(course);
+            return Result<CourseDto>.Success(dto, 201, "Course created successfully");
+        }
         public async Task<Result<bool>> DeleteCourse(int id)
         {
             var course = await _unitOfWork.Courses.GetByIdAsync(id);
@@ -137,5 +124,22 @@ namespace Application.Services
             };
             return Result<CourseDto>.Success(dto, 200, "Course updated successfully");
         }
+
+        public async Task<Result<CourseDetailedDto>> GetCourseDetailedById(int id)
+        {
+            var course = await _unitOfWork.Courses.GetByIdAsync(id);
+            if (course == null) 
+                return Result<CourseDetailedDto>.Fail("Course not found", 404);
+
+            var groups = await _unitOfWork.ClassGroups.GetGroupsByCourseIdWithDetails(id);
+
+            var dto = _mapper.Map<CourseDetailedDto>(course);
+            dto.Groups = _mapper.Map<List<ClassGroupWithInstructorDto>>(groups);
+            dto.TotalEnrolledStudents = groups.Sum(g => g.Enrollments?.Count ?? 0);
+            dto.ActiveGroups = groups.Count(g => g.EndDate == null || g.EndDate > DateTime.Now);
+
+            return Result<CourseDetailedDto>.Success(dto);
+        }
+
     }
 }

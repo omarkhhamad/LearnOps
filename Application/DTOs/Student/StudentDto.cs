@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace Application.DTOs.Student
 {
@@ -23,5 +24,6 @@ namespace Application.DTOs.Student
         /// <summary>Date of birth</summary>
         /// <example>2002-07-21</example>
         public DateTime DateOfBirth { get; set; }
+
     }
 }

@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Text.Json.Serialization;
+using Application.DTOs.ClassGroup;
+using Application.DTOs.Instructor;
 
 namespace Application.DTOs.Course
 {
@@ -27,5 +30,6 @@ namespace Application.DTOs.Course
         /// <summary>Maximum number of students allowed</summary>
         /// <example>30</example>
         public int MaxStudents { get; set; }
+
     }
 }

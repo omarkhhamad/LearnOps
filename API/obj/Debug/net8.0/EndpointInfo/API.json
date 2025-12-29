@@ -6,6 +6,225 @@
     "version": "v1"
   },
   "paths": {
+    "/api/ClassGroup": {
+      "get": {
+        "tags": [
+          "ClassGroup"
+        ],
+        "summary": "Get all class groups",
+        "description": "Returns a paginated list of class groups with optional search by name or course.",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Class groups retrieved successfully"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ClassGroup"
+        ],
+        "summary": "Create a new class group",
+        "requestBody": {
+          "description": "Class group data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddUpdateClassGroupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Class group created successfully"
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/api/ClassGroup/{id}": {
+      "get": {
+        "tags": [
+          "ClassGroup"
+        ],
+        "summary": "Get class group by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Class group ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Class group found"
+          },
+          "404": {
+            "description": "Class group not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "ClassGroup"
+        ],
+        "summary": "Update existing class group",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Class group ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Updated class group data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddUpdateClassGroupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Class group updated successfully"
+          },
+          "404": {
+            "description": "Class group not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ClassGroup"
+        ],
+        "summary": "Delete class group",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Class group ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Class group deleted successfully"
+          },
+          "404": {
+            "description": "Class group not found"
+          }
+        }
+      }
+    },
+    "/api/ClassGroup/by-course/{courseId}": {
+      "get": {
+        "tags": [
+          "ClassGroup"
+        ],
+        "summary": "Get class groups by course ID",
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "description": "Course ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Class groups retrieved successfully"
+          },
+          "404": {
+            "description": "No class groups found for the course"
+          }
+        }
+      }
+    },
+    "/api/ClassGroup/bulk-delete": {
+      "delete": {
+        "tags": [
+          "ClassGroup"
+        ],
+        "summary": "Deletes multiple class groups by their IDs",
+        "requestBody": {
+          "description": "A list of class group IDs to be deleted",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Class groups deleted successfully"
+          },
+          "400": {
+            "description": "Invalid or empty IDs list"
+          },
+          "404": {
+            "description": "No class groups found with the provided IDs"
+          }
+        }
+      }
+    },
     "/api/Course": {
       "get": {
         "tags": [
@@ -45,14 +264,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Courses retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CourseDtoPagedResultResult"
-                }
-              }
-            }
+            "description": "Courses retrieved successfully"
           }
         }
       },
@@ -72,70 +284,19 @@
           }
         },
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "201": {
-            "description": "Course created successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CourseDtoResult"
-                }
-              }
-            }
+            "description": "Course created successfully"
           },
           "400": {
-            "description": "Invalid input",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StringResult"
-                }
-              }
-            }
+            "description": "Invalid input"
           }
         }
       }
     },
     "/api/Course/{id}": {
-      "get": {
-        "tags": [
-          "Course"
-        ],
-        "summary": "Get course by ID",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "Course ID",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Course found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CourseDtoResult"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Course not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StringResult"
-                }
-              }
-            }
-          }
-        }
-      },
       "put": {
         "tags": [
           "Course"
@@ -165,24 +326,10 @@
         },
         "responses": {
           "200": {
-            "description": "Course updated successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CourseDtoResult"
-                }
-              }
-            }
+            "description": "Course updated successfully"
           },
           "404": {
-            "description": "Course not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StringResult"
-                }
-              }
-            }
+            "description": "Course not found"
           }
         }
       },
@@ -205,24 +352,32 @@
         ],
         "responses": {
           "200": {
-            "description": "Course deleted successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BooleanResult"
-                }
-              }
-            }
+            "description": "Course deleted successfully"
           },
           "404": {
-            "description": "Course not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StringResult"
-                }
-              }
+            "description": "Course not found"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Course"
+        ],
+        "summary": "Get detailed course information with groups, instructors, and students",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -249,34 +404,13 @@
         },
         "responses": {
           "200": {
-            "description": "Courses deleted successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BooleanResult"
-                }
-              }
-            }
+            "description": "Courses deleted successfully"
           },
           "400": {
-            "description": "Invalid or empty list of IDs",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StringResult"
-                }
-              }
-            }
+            "description": "Invalid or empty list of IDs"
           },
           "404": {
-            "description": "No courses found for the provided IDs",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StringResult"
-                }
-              }
-            }
+            "description": "No courses found for the provided IDs"
           }
         }
       }
@@ -317,14 +451,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Instructors retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InstructorDtoPagedResultResult"
-                }
-              }
-            }
+            "description": "Instructors retrieved successfully"
           }
         }
       },
@@ -344,70 +471,19 @@
           }
         },
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "201": {
-            "description": "Instructor created successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InstructorDtoResult"
-                }
-              }
-            }
+            "description": "Instructor created successfully"
           },
           "400": {
-            "description": "Invalid input",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StringResult"
-                }
-              }
-            }
+            "description": "Invalid input"
           }
         }
       }
     },
     "/api/Instructor/{id}": {
-      "get": {
-        "tags": [
-          "Instructor"
-        ],
-        "summary": "Get instructor by ID",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "Instructor ID",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Instructor found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InstructorDtoResult"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Instructor not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StringResult"
-                }
-              }
-            }
-          }
-        }
-      },
       "put": {
         "tags": [
           "Instructor"
@@ -437,24 +513,10 @@
         },
         "responses": {
           "200": {
-            "description": "Instructor updated successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InstructorDtoResult"
-                }
-              }
-            }
+            "description": "Instructor updated successfully"
           },
           "404": {
-            "description": "Instructor not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StringResult"
-                }
-              }
-            }
+            "description": "Instructor not found"
           }
         }
       },
@@ -498,6 +560,28 @@
             }
           }
         }
+      },
+      "get": {
+        "tags": [
+          "Instructor"
+        ],
+        "summary": "Get detailed instructor information with groups, courses, and students",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
     "/api/Instructor/bulk-delete": {
@@ -523,34 +607,13 @@
         },
         "responses": {
           "200": {
-            "description": "Instructors deleted successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BooleanResult"
-                }
-              }
-            }
+            "description": "Instructors deleted successfully"
           },
           "400": {
-            "description": "Invalid or empty instructor IDs list",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StringResult"
-                }
-              }
-            }
+            "description": "Invalid or empty instructor IDs list"
           },
           "404": {
-            "description": "No instructors found with the provided IDs",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StringResult"
-                }
-              }
-            }
+            "description": "No instructors found with the provided IDs"
           }
         }
       }
@@ -591,14 +654,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Students retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StudentDtoPagedResultResult"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       },
@@ -618,70 +674,13 @@
           }
         },
         "responses": {
-          "201": {
-            "description": "Student created successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StudentDtoResult"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid input",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StringResult"
-                }
-              }
-            }
+          "200": {
+            "description": "OK"
           }
         }
       }
     },
     "/api/Student/{id}": {
-      "get": {
-        "tags": [
-          "Student"
-        ],
-        "summary": "Get student by ID",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "Student ID",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Student found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StudentDtoResult"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Student not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StringResult"
-                }
-              }
-            }
-          }
-        }
-      },
       "put": {
         "tags": [
           "Student"
@@ -711,24 +710,7 @@
         },
         "responses": {
           "200": {
-            "description": "Student updated successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StudentDtoResult"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Student not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StringResult"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       },
@@ -751,24 +733,29 @@
         ],
         "responses": {
           "200": {
-            "description": "Student deleted successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BooleanResult"
-                }
-              }
+            "description": "OK"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Student"
+        ],
+        "summary": "Get detailed student information with enrollments, courses, and groups",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
             }
-          },
-          "404": {
-            "description": "Student not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StringResult"
-                }
-              }
-            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -795,34 +782,7 @@
         },
         "responses": {
           "200": {
-            "description": "Students deleted successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BooleanResult"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid or empty student IDs list.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StringResult"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "No students found with the provided IDs.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StringResult"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
@@ -830,6 +790,55 @@
   },
   "components": {
     "schemas": {
+      "AddUpdateClassGroupDto": {
+        "required": [
+          "courseId",
+          "days",
+          "endDate",
+          "instructorId",
+          "name",
+          "room",
+          "startDate",
+          "time"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "room": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "days": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "time": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "courseId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "instructorId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "AddUpdateCourseDto": {
         "required": [
           "title"
@@ -949,202 +958,6 @@
         },
         "additionalProperties": false
       },
-      "CourseDto": {
-        "type": "object",
-        "properties": {
-          "courseId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "title": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "durationWeeks": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "price": {
-            "type": "number",
-            "format": "double"
-          },
-          "maxStudents": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "CourseDtoPagedResult": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CourseDto"
-            },
-            "nullable": true
-          },
-          "currentPage": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "pageSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalRecords": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32",
-            "readOnly": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "CourseDtoPagedResultResult": {
-        "type": "object",
-        "properties": {
-          "isSuccess": {
-            "type": "boolean"
-          },
-          "message": {
-            "type": "string",
-            "nullable": true
-          },
-          "statusCode": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "data": {
-            "$ref": "#/components/schemas/CourseDtoPagedResult"
-          }
-        },
-        "additionalProperties": false
-      },
-      "CourseDtoResult": {
-        "type": "object",
-        "properties": {
-          "isSuccess": {
-            "type": "boolean"
-          },
-          "message": {
-            "type": "string",
-            "nullable": true
-          },
-          "statusCode": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "data": {
-            "$ref": "#/components/schemas/CourseDto"
-          }
-        },
-        "additionalProperties": false
-      },
-      "InstructorDto": {
-        "type": "object",
-        "properties": {
-          "instructorId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "fullName": {
-            "type": "string",
-            "nullable": true
-          },
-          "phone": {
-            "type": "string",
-            "nullable": true
-          },
-          "email": {
-            "type": "string",
-            "nullable": true
-          },
-          "hourlyRate": {
-            "type": "number",
-            "format": "double"
-          }
-        },
-        "additionalProperties": false
-      },
-      "InstructorDtoPagedResult": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/InstructorDto"
-            },
-            "nullable": true
-          },
-          "currentPage": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "pageSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalRecords": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32",
-            "readOnly": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "InstructorDtoPagedResultResult": {
-        "type": "object",
-        "properties": {
-          "isSuccess": {
-            "type": "boolean"
-          },
-          "message": {
-            "type": "string",
-            "nullable": true
-          },
-          "statusCode": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "data": {
-            "$ref": "#/components/schemas/InstructorDtoPagedResult"
-          }
-        },
-        "additionalProperties": false
-      },
-      "InstructorDtoResult": {
-        "type": "object",
-        "properties": {
-          "isSuccess": {
-            "type": "boolean"
-          },
-          "message": {
-            "type": "string",
-            "nullable": true
-          },
-          "statusCode": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "data": {
-            "$ref": "#/components/schemas/InstructorDto"
-          }
-        },
-        "additionalProperties": false
-      },
       "StringResult": {
         "type": "object",
         "properties": {
@@ -1162,102 +975,6 @@
           "data": {
             "type": "string",
             "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "StudentDto": {
-        "type": "object",
-        "properties": {
-          "studentId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "fullName": {
-            "type": "string",
-            "nullable": true
-          },
-          "phone": {
-            "type": "string",
-            "nullable": true
-          },
-          "email": {
-            "type": "string",
-            "nullable": true
-          },
-          "dateOfBirth": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "additionalProperties": false
-      },
-      "StudentDtoPagedResult": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/StudentDto"
-            },
-            "nullable": true
-          },
-          "currentPage": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "pageSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalRecords": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32",
-            "readOnly": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "StudentDtoPagedResultResult": {
-        "type": "object",
-        "properties": {
-          "isSuccess": {
-            "type": "boolean"
-          },
-          "message": {
-            "type": "string",
-            "nullable": true
-          },
-          "statusCode": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "data": {
-            "$ref": "#/components/schemas/StudentDtoPagedResult"
-          }
-        },
-        "additionalProperties": false
-      },
-      "StudentDtoResult": {
-        "type": "object",
-        "properties": {
-          "isSuccess": {
-            "type": "boolean"
-          },
-          "message": {
-            "type": "string",
-            "nullable": true
-          },
-          "statusCode": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "data": {
-            "$ref": "#/components/schemas/StudentDto"
           }
         },
         "additionalProperties": false

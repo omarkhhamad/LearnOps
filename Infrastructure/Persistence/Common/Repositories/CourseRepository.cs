@@ -1,24 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Domain.Models;
 using Application.Interfaces.IRepositories;
+using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Common.Repositories
 {
     public class CourseRepository :BaseRepository<Course,int>, ICourseRepository
     {
-        private new readonly AppDbContext _context;
 
         public CourseRepository(AppDbContext context) : base(context)
         {
-            _context = context;
         }
 
-        public new void Delete(Course course)
+        public override void Delete(Course course)
         {
             course.IsDeleted = true;
             course.DeletedAt = DateTime.UtcNow;

@@ -17,5 +17,6 @@ namespace Application.Interfaces.IServices
         Task<Result<CourseDto>> UpdateCourse(int id, AddUpdateCourseDto courseDto);
         Task<Result<bool>> DeleteCourse(int id);
         Task<Result<bool>> DeleteCourses(List<int> ids);
+        Task<Result<CourseDetailedDto>> GetCourseDetailedById(int id);
     }
 }

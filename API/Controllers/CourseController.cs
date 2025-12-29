@@ -28,26 +28,11 @@ namespace API.Controllers
         /// <param name="pageSize">Number of items per page (default is 10)</param>
         /// <response code="200">Courses retrieved successfully</response>
         [HttpGet]
-        [ProducesResponseType(typeof(Result<PagedResult<CourseDto>>), StatusCodes.Status200OK)]
+        //[ProducesResponseType(typeof(Result<PagedResult<CourseDto>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAllCourses([FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             var courses = await _courseService.GetAllCourses(search, page, pageSize);
             return ToActionResult(courses);
-        }
-
-        /// <summary>
-        /// Get course by ID
-        /// </summary>
-        /// <param name="id">Course ID</param>
-        /// <response code="200">Course found</response>
-        /// <response code="404">Course not found</response>
-        [HttpGet("{id}")]
-        [ProducesResponseType(typeof(Result<CourseDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(Result<string>), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetCourseById(int id)
-        {
-            var result = await _courseService.GetCourseById(id);
-            return ToActionResult(result);
         }
 
         /// <summary>
@@ -57,8 +42,8 @@ namespace API.Controllers
         /// <response code="201">Course created successfully</response>
         /// <response code="400">Invalid input</response>
         [HttpPost]
-        [ProducesResponseType(typeof(Result<CourseDto>), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
+        //[ProducesResponseType(typeof(Result<CourseDto>), StatusCodes.Status201Created)]
+        //[ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> AddCourse([FromBody] AddUpdateCourseDto courseDto)
         {
             var result = await _courseService.AddCourse(courseDto);
@@ -73,8 +58,8 @@ namespace API.Controllers
         /// <response code="200">Course updated successfully</response>
         /// <response code="404">Course not found</response>
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(Result<CourseDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(Result<string>), StatusCodes.Status404NotFound)]
+        //[ProducesResponseType(typeof(Result<CourseDto>), StatusCodes.Status200OK)]
+        //[ProducesResponseType(typeof(Result<string>), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateCourse(int id, [FromBody] AddUpdateCourseDto courseDto)
         {
             var result = await _courseService.UpdateCourse(id, courseDto);
@@ -88,8 +73,8 @@ namespace API.Controllers
         /// <response code="200">Course deleted successfully</response>
         /// <response code="404">Course not found</response>
         [HttpDelete("{id}")]
-        [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(Result<string>), StatusCodes.Status404NotFound)]
+        //[ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
+        //[ProducesResponseType(typeof(Result<string>), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteCourse(int id)
         {
             var result = await _courseService.DeleteCourse(id);
@@ -104,13 +89,26 @@ namespace API.Controllers
         /// <response code="400">Invalid or empty list of IDs</response>
         /// <response code="404">No courses found for the provided IDs</response>
         [HttpDelete("bulk-delete")]
-        [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(Result<string>), StatusCodes.Status404NotFound)]
+        //[ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
+        //[ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
+        //[ProducesResponseType(typeof(Result<string>), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> BulkDeleteCourses([FromBody] List<int> ids)
         {
             var result = await _courseService.DeleteCourses(ids);
             return ToActionResult(result);
         }
+
+        /// <summary>
+        /// Get detailed course information with groups, instructors, and students
+        /// </summary>
+        [HttpGet("{id}")]
+        //[ProducesResponseType(typeof(Result<CourseDetailedDto>), StatusCodes.Status200OK)]
+        //[ProducesResponseType(typeof(Result<string>), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetCourseDetailed(int id)
+        {
+            var result = await _courseService.GetCourseDetailedById(id);
+            return ToActionResult(result);
+        }
+
     }
 }

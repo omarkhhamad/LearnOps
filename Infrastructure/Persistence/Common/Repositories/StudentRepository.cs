@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Application.Interfaces.IRepositories;
 using Domain.Models;
@@ -10,29 +8,8 @@ namespace Infrastructure.Persistence.Common.Repositories
 {
     public class StudentRepository : BaseRepository<Student, int>, IStudentRepository
     {
-        private new readonly AppDbContext _context;
-
         public StudentRepository(AppDbContext context) : base(context)
         {
-            _context = context;
-        }
-
-        public async Task<Student> GetStudentWithCoursesAsync(int studentId)
-        {
-            return await _context.Students
-                .Include(s => s.Enrollments)
-                    .ThenInclude(e => e.ClassGroup)
-                        .ThenInclude(cg => cg.Course)
-                .FirstOrDefaultAsync(s => s.StudentId == studentId);
-        }
-
-        public async Task<List<Student>> GetAllStudentsWithCoursesAsync()
-        {
-            return await _context.Students
-                .Include(s => s.Enrollments)
-                    .ThenInclude(e => e.ClassGroup)
-                        .ThenInclude(cg => cg.Course)
-                .ToListAsync();
         }
 
         public async Task<Student> GetByEmailAsync(string email)
@@ -45,12 +22,7 @@ namespace Infrastructure.Persistence.Common.Repositories
                 .ToListAsync();
         }
 
-        //public void DeleteRange(IEnumerable<Student> students)
-        //{
-        //    _context.Students.RemoveRange(students);
-        //}
-
-        public new void Delete(Student student)
+        public override void Delete(Student student)
         {
             student.IsDeleted = true;
             student.DeletedAt = DateTime.UtcNow;
@@ -67,6 +39,16 @@ namespace Infrastructure.Persistence.Common.Repositories
 
             _context.Students.UpdateRange(students);
         }
+
+        public async Task<Student?> GetStudentWithCoursesAsync(int studentId)
+        {
+            return await _context.Students
+                .Include(s => s.Enrollments)
+                    .ThenInclude(e => e.ClassGroup)
+                        .ThenInclude(g => g.Course)
+                .FirstOrDefaultAsync(s => s.StudentId == studentId);
+        }
+
 
     }
 }

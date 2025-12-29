@@ -12,6 +12,8 @@ namespace Application.UnitOfWork
         IStudentRepository Students { get; }
         ICourseRepository Courses { get; }
         IInstructorRepository Instructors { get; }
+        IClassGroupRepository ClassGroups { get; }
+        IEnrollmentRepository Enrollments { get; }
         Task<int> CommitAsync();
     }
 

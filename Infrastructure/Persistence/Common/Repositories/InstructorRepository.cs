@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Application.Interfaces.IRepositories;
 using Domain.Models;
@@ -10,10 +8,8 @@ namespace Infrastructure.Persistence.Common.Repositories
 {
     public class InstructorRepository : BaseRepository<Instructor, int>, IInstructorRepository
     {
-        private new readonly AppDbContext _context;
         public InstructorRepository(AppDbContext context) : base(context)
         {
-            _context = context;
         }
         public void DeleteRange(IEnumerable<Instructor> instructors)
         {
@@ -33,11 +29,13 @@ namespace Infrastructure.Persistence.Common.Repositories
                 .ToListAsync();
         }
 
-        public Task<Instructor> GetInstructorWithClassGroupsAsync(int id)
+        public async Task<Instructor?> GetInstructorWithCoursesAndGroupsAsync(int id)
         {
-            return _context.Instructors
+            return await _context.Instructors
                 .Include(i => i.ClassGroups)
-                .ThenInclude(cg => cg.Course)
+                    .ThenInclude(g => g.Course)
+                .Include(i => i.ClassGroups)
+                    .ThenInclude(g => g.Enrollments)
                 .FirstOrDefaultAsync(i => i.InstructorId == id);
         }
     }

@@ -13,16 +13,22 @@ namespace Application.UnitOfWork
         public IStudentRepository Students { get; }
         public ICourseRepository Courses { get; }
         public IInstructorRepository Instructors { get; }
+        public IClassGroupRepository ClassGroups { get; }
+        public IEnrollmentRepository Enrollments { get; }
 
         public UnitOfWork(AppDbContext context,
                             IStudentRepository studentRepo, 
                             ICourseRepository courseRepo,
-                            IInstructorRepository instructors)
+                            IInstructorRepository instructors,
+                            IClassGroupRepository classGroups,
+                            IEnrollmentRepository enrollments)
         {
             _context = context;
             Students = studentRepo;
             Courses = courseRepo;
             Instructors = instructors;
+            ClassGroups = classGroups;
+            Enrollments = enrollments;
         }
 
         public async Task<int> CommitAsync()

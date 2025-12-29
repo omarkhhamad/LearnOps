@@ -1,43 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Application.DTOs.Instructor;
 using Application.Interfaces.IServices;
 using Application.Result;
 using Application.UnitOfWork;
+using AutoMapper;
 using Domain.Models;
 namespace Application.Services
 {
     public class InstructorService : IInstructorService
     {
         private readonly IUnitOfWork _unitOfWork;
-        public InstructorService(IUnitOfWork unitOfWork)
+        private readonly IMapper _mapper;
+        public InstructorService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
         public async Task<Result<InstructorDto>> AddInstructor(AddUpdateInstructorDto instructor)
         {
-            var newInstructor = new Instructor
-            {
-                FullName = instructor.FullName,
-                Phone = instructor.Phone,
-                Email = instructor.Email,
-                HourlyRate = instructor.HourlyRate,
-            };
-
+            var newInstructor = _mapper.Map <Instructor>(instructor);
             await _unitOfWork.Instructors.AddAsync(newInstructor);
             await _unitOfWork.CommitAsync();
 
-            var dto = new InstructorDto
-            {
-                InstructorId = newInstructor.InstructorId,
-                FullName = newInstructor.FullName,
-                Phone = newInstructor.Phone,
-                Email = newInstructor.Email,
-                HourlyRate = newInstructor.HourlyRate
-            };
+            var dto = _mapper.Map <InstructorDto>(newInstructor);
 
             return Result<InstructorDto>.Success(dto, 201, "Instructor created successfully");
         }
@@ -99,25 +87,9 @@ namespace Application.Services
         {
             var instructor = await  _unitOfWork.Instructors.GetByIdAsync(id);
             if (instructor == null) return Result<InstructorDto>.Fail("Instructor not found", 404);
-            var dto = new InstructorDto
-            {
-                InstructorId = instructor.InstructorId,
-                FullName = instructor.FullName,
-                Phone = instructor.Phone,
-                Email = instructor.Email,
-                HourlyRate = instructor.HourlyRate
-            };
+            var dto = _mapper.Map <InstructorDto>(instructor);
             return Result<InstructorDto>.Success(dto);
         }
-
-        //public async Task<bool> IsInstructorAvailableAsync(int instructorId, DateTime startTime, DateTime endTime)
-        //{
-        //    var assignments = await _unitOfWork.ClassAssignments.FindAsync(ca =>
-        //        ca.InstructorId == instructorId &&
-        //        ((ca.StartTime < endTime) && (ca.EndTime > startTime))
-        //    );
-        //}
-
 
         public async Task<Result<InstructorDto>> UpdateInstructor(int id, AddUpdateInstructorDto instructor)
         {
@@ -133,17 +105,22 @@ namespace Application.Services
             _unitOfWork.Instructors.Update(existingInstructor);
             await _unitOfWork.CommitAsync();
 
-            var dto = new InstructorDto
-            {
-                InstructorId = existingInstructor.InstructorId,
-                FullName = existingInstructor.FullName,
-                Phone = existingInstructor.Phone,
-                Email = existingInstructor.Email,
-                HourlyRate = existingInstructor.HourlyRate
-            };
+            var dto = _mapper.Map <InstructorDto>(existingInstructor);
 
             return Result<InstructorDto>.Success(dto, 200, "Instructor updated successfully");
         }
+
+        public async Task<Result<InstructorDetailedDto>> GetInstructorDetailedById(int id)
+        {
+            var instructor = await _unitOfWork.Instructors.GetInstructorWithCoursesAndGroupsAsync(id);
+            if (instructor == null)
+                return Result<InstructorDetailedDto>.Fail("Instructor not found", 404);
+
+            var dto = _mapper.Map<InstructorDetailedDto>(instructor);
+
+            return Result<InstructorDetailedDto>.Success(dto);
+        }
+
 
     }
 }
