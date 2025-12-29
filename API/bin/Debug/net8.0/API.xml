@@ -4,6 +4,170 @@
         <name>API</name>
     </assembly>
     <members>
+        <member name="M:API.Controllers.ClassGroupController.GetAllGroups(System.String,System.Int32,System.Int32)">
+            <summary>
+            Get all class groups
+            </summary>
+            <remarks>
+            Returns a paginated list of class groups with optional search by name or course.
+            </remarks>
+            <response code="200">Class groups retrieved successfully</response>
+        </member>
+        <member name="M:API.Controllers.ClassGroupController.GetGroupById(System.Int32)">
+            <summary>
+            Get class group by ID
+            </summary>
+            <param name="id">Class group ID</param>
+            <response code="200">Class group found</response>
+            <response code="404">Class group not found</response>
+        </member>
+        <member name="M:API.Controllers.ClassGroupController.GetGroupsByCourse(System.Int32)">
+            <summary>
+            Get class groups by course ID
+            </summary>
+            <param name="courseId">Course ID</param>
+            <response code="200">Class groups retrieved successfully</response>
+            <response code="404">No class groups found for the course</response>
+        </member>
+        <member name="M:API.Controllers.ClassGroupController.AddGroup(Application.DTOs.ClassGroup.AddUpdateClassGroupDto)">
+            <summary>
+            Create a new class group
+            </summary>
+            <param name="groupDto">Class group data</param>
+            <response code="201">Class group created successfully</response>
+            <response code="400">Invalid input</response>
+        </member>
+        <member name="M:API.Controllers.ClassGroupController.UpdateGroup(System.Int32,Application.DTOs.ClassGroup.AddUpdateClassGroupDto)">
+            <summary>
+            Update existing class group
+            </summary>
+            <param name="id">Class group ID</param>
+            <param name="groupDto">Updated class group data</param>
+            <response code="200">Class group updated successfully</response>
+            <response code="404">Class group not found</response>
+        </member>
+        <member name="M:API.Controllers.ClassGroupController.DeleteGroup(System.Int32)">
+            <summary>
+            Delete class group
+            </summary>
+            <param name="id">Class group ID</param>
+            <response code="200">Class group deleted successfully</response>
+            <response code="404">Class group not found</response>
+        </member>
+        <member name="M:API.Controllers.ClassGroupController.BulkDelete(System.Collections.Generic.List{System.Int32})">
+            <summary>
+            Deletes multiple class groups by their IDs
+            </summary>
+            <param name="ids">A list of class group IDs to be deleted</param>
+            <response code="200">Class groups deleted successfully</response>
+            <response code="400">Invalid or empty IDs list</response>
+            <response code="404">No class groups found with the provided IDs</response>
+        </member>
+        <member name="M:API.Controllers.CourseController.GetAllCourses(System.String,System.Int32,System.Int32)">
+            <summary>
+            Get all courses
+            </summary>
+            <remarks>
+            Returns a paginated list of all courses in the system. You can search by title or description.
+            </remarks>
+            <param name="search">Optional search term to filter courses</param>
+            <param name="page">Page number (default is 1)</param>
+            <param name="pageSize">Number of items per page (default is 10)</param>
+            <response code="200">Courses retrieved successfully</response>
+        </member>
+        <member name="M:API.Controllers.CourseController.AddCourse(Application.DTOs.Course.AddUpdateCourseDto)">
+            <summary>
+            Create a new course
+            </summary>
+            <param name="courseDto">Course data</param>
+            <response code="201">Course created successfully</response>
+            <response code="400">Invalid input</response>
+        </member>
+        <member name="M:API.Controllers.CourseController.UpdateCourse(System.Int32,Application.DTOs.Course.AddUpdateCourseDto)">
+            <summary>
+            Update an existing course
+            </summary>
+            <param name="id">Course ID</param>
+            <param name="courseDto">Updated course data</param>
+            <response code="200">Course updated successfully</response>
+            <response code="404">Course not found</response>
+        </member>
+        <member name="M:API.Controllers.CourseController.DeleteCourse(System.Int32)">
+            <summary>
+            Delete a course by ID
+            </summary>
+            <param name="id">Course ID</param>
+            <response code="200">Course deleted successfully</response>
+            <response code="404">Course not found</response>
+        </member>
+        <member name="M:API.Controllers.CourseController.BulkDeleteCourses(System.Collections.Generic.List{System.Int32})">
+            <summary>
+            Delete multiple courses by their IDs
+            </summary>
+            <param name="ids">List of course IDs to delete</param>
+            <response code="200">Courses deleted successfully</response>
+            <response code="400">Invalid or empty list of IDs</response>
+            <response code="404">No courses found for the provided IDs</response>
+        </member>
+        <member name="M:API.Controllers.CourseController.GetCourseDetailed(System.Int32)">
+            <summary>
+            Get detailed course information with groups, instructors, and students
+            </summary>
+        </member>
+        <member name="M:API.Controllers.InstructorController.GetAllInstructors(System.String,System.Int32,System.Int32)">
+            <summary>
+            Get all instructors
+            </summary>
+            <remarks>
+            Returns a paginated list of instructors with optional search by name or phone.
+            </remarks>
+            <response code="200">Instructors retrieved successfully</response>
+        </member>
+        <member name="M:API.Controllers.InstructorController.AddInstructor(Application.DTOs.Instructor.AddUpdateInstructorDto)">
+            <summary>
+            Create a new instructor
+            </summary>
+            <param name="instructorDto">Instructor data</param>
+            <response code="201">Instructor created successfully</response>
+            <response code="400">Invalid input</response>
+        </member>
+        <member name="M:API.Controllers.InstructorController.UpdateInstructor(System.Int32,Application.DTOs.Instructor.AddUpdateInstructorDto)">
+            <summary>
+            Update existing instructor
+            </summary>
+            <param name="id">Instructor ID</param>
+            <param name="instructorDto">Updated instructor data</param>
+            <response code="200">Instructor updated successfully</response>
+            <response code="404">Instructor not found</response>
+        </member>
+        <member name="M:API.Controllers.InstructorController.DeleteInstructor(System.Int32)">
+            <summary>
+            Delete instructor
+            </summary>
+            <remarks>
+            Performs a soft delete for the instructor.
+            </remarks>
+            <param name="id">Instructor ID</param>
+            <response code="200">Instructor deleted successfully</response>
+            <response code="404">Instructor not found</response>
+        </member>
+        <member name="M:API.Controllers.InstructorController.BulkDelete(System.Collections.Generic.List{System.Int32})">
+            <summary>
+            Deletes multiple instructors by their IDs
+            </summary>
+            <remarks>
+            Performs a soft delete for multiple instructors.
+            </remarks>
+            <param name="ids">A list of instructor IDs to be deleted</param>
+            <response code="200">Instructors deleted successfully</response>
+            <response code="400">Invalid or empty instructor IDs list</response>
+            <response code="404">No instructors found with the provided IDs</response>
+        </member>
+        <member name="M:API.Controllers.InstructorController.GetInstructorDetailed(System.Int32)">
+            <summary>
+            Get detailed instructor information with groups, courses, and students
+            </summary>
+        </member>
         <member name="M:API.Controllers.StudentController.GetAllStudents(System.String,System.Int32,System.Int32)">
             <summary>
             Get all students
@@ -11,15 +175,6 @@
             <remarks>
             Returns a list of all students in the system.
             </remarks>
-            <response code="200">Students retrieved successfully</response>
-        </member>
-        <member name="M:API.Controllers.StudentController.GetStudentById(System.Int32)">
-            <summary>
-            Get student by ID
-            </summary>
-            <param name="id">Student ID</param>
-            <response code="200">Student found</response>
-            <response code="404">Student not found</response>
         </member>
         <member name="M:API.Controllers.StudentController.UpdateStudent(System.Int32,Application.DTOs.Student.AddUpdateStudentDto)">
             <summary>
@@ -27,24 +182,29 @@
             </summary>
             <param name="id">Student ID</param>
             <param name="studentDto">Updated student data</param>
-            <response code="200">Student updated successfully</response>
-            <response code="404">Student not found</response>
         </member>
         <member name="M:API.Controllers.StudentController.AddStudent(Application.DTOs.Student.AddUpdateStudentDto)">
             <summary>
             Create a new student
             </summary>
             <param name="studentDto">Student data</param>
-            <response code="201">Student created successfully</response>
-            <response code="400">Invalid input</response>
         </member>
         <member name="M:API.Controllers.StudentController.DeleteStudent(System.Int32)">
             <summary>
             Delete student
             </summary>
             <param name="id">Student ID</param>
-            <response code="200">Student deleted successfully</response>
-            <response code="404">Student not found</response>
+        </member>
+        <member name="M:API.Controllers.StudentController.BulkDelete(System.Collections.Generic.List{System.Int32})">
+            <summary>
+            Deletes multiple students by their IDs.
+            </summary>
+            <param name="ids">A list of student IDs to be deleted.</param>
+        </member>
+        <member name="M:API.Controllers.StudentController.GetStudentDetailed(System.Int32)">
+            <summary>
+            Get detailed student information with enrollments, courses, and groups
+            </summary>
         </member>
     </members>
 </doc>

@@ -1,39 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Application.DTOs.Student;
-using Application.Interfaces;
 using Application.Interfaces.IServices;
 using Application.Result;
 using Application.UnitOfWork;
+using AutoMapper;
 using Domain.Models;
 namespace Application.Services
 {
     public class StudentService : IStudentService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public StudentService(IUnitOfWork unitOfWork)
+        public StudentService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
-
-        //public async Task<Result<IEnumerable<StudentDto>>> GetAllStudents()
-        //{
-        //    var students = await _unitOfWork.Students.GetAllAsync();
-        //    var dtos = students.Select(s => new StudentDto
-        //    {
-        //        StudentId = s.StudentId,
-        //        FullName = s.FullName,
-        //        Email = s.Email,
-        //        Phone = s.Phone,
-        //        DateOfBirth = s.DateOfBirth
-        //    });
-
-        //    return Result<IEnumerable<StudentDto>>.Success(dtos);
-        //}
         public async Task<Result<PagedResult<StudentDto>>> GetAllStudents(string? search,int page=1,int pageSize=10)
         {
             var students = await _unitOfWork.Students.GetAllAsync();
@@ -72,13 +58,7 @@ namespace Application.Services
             var student = await _unitOfWork.Students.GetByIdAsync(id);
             if (student == null) return Result<StudentDto>.Fail("Student not found", 404);
 
-            var dto = new StudentDto {
-                StudentId = student.StudentId,
-                FullName = student.FullName,
-                Email=student.Email, 
-                DateOfBirth=student.DateOfBirth,
-                Phone=student.Phone,
-            };
+            var dto = _mapper.Map <StudentDto>(student);
             return Result<StudentDto>.Success(dto);
         }
         public async Task<Result<StudentDto>> AddStudent(AddUpdateStudentDto studentDto)
@@ -94,14 +74,7 @@ namespace Application.Services
             await _unitOfWork.Students.AddAsync(student);
             await _unitOfWork.CommitAsync();
 
-            var dto = new StudentDto
-            {
-                StudentId = student.StudentId,
-                FullName = student.FullName,
-                Email = student.Email,
-                Phone = student.Phone,
-                DateOfBirth = student.DateOfBirth
-            };
+            var dto = _mapper.Map <StudentDto>(student);
 
             return Result<StudentDto>.Success(dto, 201, "Student added successfully");
         }
@@ -115,19 +88,11 @@ namespace Application.Services
             student.Email = studentDto.Email;
             student.Phone = studentDto.Phone;
             student.DateOfBirth = studentDto.DateOfBirth;
-            student.CreatedAt = DateTime.UtcNow;
 
             _unitOfWork.Students.Update(student);
             await _unitOfWork.CommitAsync();
 
-            var dto = new StudentDto
-            {
-                StudentId = student.StudentId,
-                FullName = student.FullName,
-                Email = student.Email,
-                Phone = student.Phone,
-                DateOfBirth = student.DateOfBirth
-            };
+            var dto = _mapper.Map <StudentDto>(student);
 
             return Result<StudentDto>.Success(dto, 200, "Student updated successfully");
         }
@@ -140,6 +105,33 @@ namespace Application.Services
             _unitOfWork.Students.Delete(student);
             await _unitOfWork.CommitAsync();
             return Result<bool>.Success(true, 200, "Student deleted successfully");
+        }
+
+        public async Task<Result<bool>> DeleteStudents(List<int> ids)
+        {
+            if (ids == null || !ids.Any())
+                return Result<bool>.Fail("No students selected", 400);
+
+            var students = await _unitOfWork.Students.GetByIdsAsync(ids);
+
+            if (!students.Any())
+                return Result<bool>.Fail("No students found", 404);
+
+            _unitOfWork.Students.DeleteRange(students);
+            await _unitOfWork.CommitAsync();
+
+            return Result<bool>.Success(true, 200, $"{students.Count()} students deleted successfully");
+        }
+
+        public async Task<Result<StudentDetailedDto>> GetStudentDetailedById(int id)
+        {
+            var student = await _unitOfWork.Students.GetStudentWithCoursesAsync(id);
+            if (student == null) 
+                return Result<StudentDetailedDto>.Fail("Student not found", 404);
+
+            var dto = _mapper.Map<StudentDetailedDto>(student);
+
+            return Result<StudentDetailedDto>.Success(dto);
         }
 
     }

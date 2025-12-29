@@ -26,6 +26,22 @@ namespace Infrastructure.Persistence
         {
             base.OnModelCreating(modelBuilder);
 
+            // Similar query filters for other entities with IsDeleted property
+
+            modelBuilder.Entity<Student>()
+              .HasQueryFilter(s => !s.IsDeleted);
+
+            modelBuilder.Entity<Enrollment>()
+               .HasQueryFilter(e => !e.IsDeleted);
+
+            modelBuilder.Entity<Course>()
+                .HasQueryFilter(c => !c.IsDeleted);
+
+            modelBuilder.Entity<Instructor>()
+                .HasQueryFilter(i => !i.IsDeleted);
+
+            modelBuilder.Entity<ClassGroup>()
+                .HasQueryFilter(a => !a.IsDeleted);
 
             modelBuilder.Entity<Course>()
                 .Property(c => c.Price)

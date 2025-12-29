@@ -177,3 +177,4 @@ E:\ITI\Review\LearnOps\API\obj\Debug\net8.0\ref\API.dll
 E:\ITI\Review\LearnOps\API\bin\Debug\net8.0\API.xml
 E:\ITI\Review\LearnOps\API\obj\Debug\net8.0\API.MvcApplicationPartsAssemblyInfo.cs
 E:\ITI\Review\LearnOps\API\obj\Debug\net8.0\API.xml
+E:\ITI\Review\LearnOps\API\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

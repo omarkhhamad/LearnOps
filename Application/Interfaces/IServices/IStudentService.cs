@@ -15,5 +15,8 @@ namespace Application.Interfaces.IServices
         Task<Result<StudentDto>> AddStudent(AddUpdateStudentDto studentDto);
         Task<Result<StudentDto>> UpdateStudent(int id, AddUpdateStudentDto studentDto);
         Task<Result<bool>> DeleteStudent(int id);
+        Task<Result<bool>> DeleteStudents(List<int> ids);
+        Task<Result<StudentDetailedDto>> GetStudentDetailedById(int id);
+
     }
 }

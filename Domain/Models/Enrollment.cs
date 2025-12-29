@@ -1,6 +1,6 @@
 ﻿namespace Domain.Models
 {
-    public class Enrollment
+    public class Enrollment:BaseEntity
     {
         public int EnrollmentId { get; set; }
         public DateTime EnrollmentDate { get; set; }
