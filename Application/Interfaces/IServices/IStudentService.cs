@@ -10,10 +10,13 @@ namespace Application.Interfaces.IServices
 {
     public interface IStudentService
     {
-        Task<Result<IEnumerable<StudentDto>>> GetAllStudents();
+        Task<Result<PagedResult<StudentDto>>> GetAllStudents(string? search, int page, int pageSize);
         Task<Result<StudentDto>> GetStudentById(int id);
-        Task<Result<string>> AddStudent(AddUpdateStudentDto studentDto);
-        Task<Result<string>> UpdateStudent(int id, AddUpdateStudentDto studentDto);
-        Task<Result<string>> DeleteStudent(int id);
+        Task<Result<StudentDto>> AddStudent(AddUpdateStudentDto studentDto);
+        Task<Result<StudentDto>> UpdateStudent(int id, AddUpdateStudentDto studentDto);
+        Task<Result<bool>> DeleteStudent(int id);
+        Task<Result<bool>> DeleteStudents(List<int> ids);
+        Task<Result<StudentDetailedDto>> GetStudentDetailedById(int id);
+
     }
 }

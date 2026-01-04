@@ -1,25 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Application.Result
+﻿public class Result<T>
 {
-    public class Result<T> : Result
+    public bool IsSuccess { get; init; }
+    public string Message { get; init; } = string.Empty;
+    public int StatusCode { get; init; }
+    public T? Data { get; init; }
+
+    private Result(bool isSuccess, T? data, string message, int statusCode)
     {
-        public T Data { get; set; }
-
-        protected Result(T? data, bool isSuccess, string message, int statusCode)
-            : base(isSuccess, message, statusCode)
-        {
-            Data = data;
-        }
-
-        public static Result<T> Success(T data, int statusCode = 200, string message = "Success") =>
-            new(data, true, message, statusCode);
-
-        public static new Result<T> Fail(string message, int statusCode) =>
-            new(default, false, message, statusCode);
+        IsSuccess = isSuccess;
+        Data = data;
+        Message = message;
+        StatusCode = statusCode;
     }
+
+    public static Result<T> Success(T data, int statusCode = 200, string message = "Success")
+        => new(true, data, message, statusCode);
+
+    public static Result<T> Fail(string message, int statusCode)
+        => new(false, default, message, statusCode);
 }
