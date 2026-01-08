@@ -1,2 +1,18 @@
+# Standard .NET Ignore
+[Bb]in/
+[Oo]bj/
+out/
 .vs/
-appsettings.json
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Secrets (Keep your appsettings.json, but ignore the ones with secrets)
+appsettings.Development.json
+
+# OS junk
+Thumbs.db
+.DS_Store

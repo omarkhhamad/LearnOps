@@ -4,12 +4,12 @@ namespace Domain.Models
 {
     public class ExamResult
     {
-        [Key]
-        public int ResultId { get; set; }
-        public int ExamId { get; set; }
+    
+        public int ExamResultId { get; set; }
         public int Score { get; set; }
         public int EnrollmentId { get; set; }
-        public string Result { get; set; } = null!;
+        public int ExamId { get; set; }
+        public string? Result { get; set; }
         // Navigation Properties
         public Enrollment Enrollment { get; set; } = null!;
         public Exam Exam { get; set; } = null!;
