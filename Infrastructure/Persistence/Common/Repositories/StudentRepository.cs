@@ -12,7 +12,7 @@ namespace Infrastructure.Persistence.Common.Repositories
         {
         }
 
-        public async Task<Student> GetByEmailAsync(string email)
+        public async Task<Student?> GetByEmailAsync(string email)
             => await _context.Students.FirstOrDefaultAsync(s => s.Email == email);
 
         public async Task<IEnumerable<Student>> GetByIdsAsync(List<int> ids)

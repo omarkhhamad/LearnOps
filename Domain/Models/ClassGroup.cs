@@ -7,7 +7,6 @@ namespace Domain.Models
         [Key]
         public int GroupId { get; set; }
         public string Name { get; set; } = null!;
-
         public string Room { get; set; } = null!;
 
         public string Days { get; set; } = null!;
