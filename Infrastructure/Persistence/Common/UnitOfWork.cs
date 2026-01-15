@@ -15,13 +15,15 @@ namespace Application.UnitOfWork
         public IInstructorRepository Instructors { get; }
         public IClassGroupRepository ClassGroups { get; }
         public IEnrollmentRepository Enrollments { get; }
+        public IExamRepository Exams { get; }
 
         public UnitOfWork(AppDbContext context,
                             IStudentRepository studentRepo, 
                             ICourseRepository courseRepo,
                             IInstructorRepository instructors,
                             IClassGroupRepository classGroups,
-                            IEnrollmentRepository enrollments)
+                            IEnrollmentRepository enrollments,
+                            IExamRepository exam)
         {
             _context = context;
             Students = studentRepo;
@@ -29,6 +31,7 @@ namespace Application.UnitOfWork
             Instructors = instructors;
             ClassGroups = classGroups;
             Enrollments = enrollments;
+            Exams = exam;
         }
 
         public async Task<int> CommitAsync()
