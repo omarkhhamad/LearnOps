@@ -19,12 +19,14 @@ namespace API.Extensions
             services.AddScoped<ICourseService, CourseService>();
             services.AddScoped<IInstructorService, InstructorService>();
             services.AddScoped<IClassGroupService, ClassGroupService>();
+            services.AddScoped<IExamService, ExamService>();
             // Repositories
             services.AddScoped<IStudentRepository, StudentRepository>();
             services.AddScoped<ICourseRepository, CourseRepository>();
             services.AddScoped<IInstructorRepository, InstructorRepository>();
             services.AddScoped<IClassGroupRepository, ClassGroupRepository>();
             services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
+            services.AddScoped<IExamRepository, ExamRepository>();
         }
     }
 
