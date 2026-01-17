@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Application.DTOs.Exam
 {
-    public class ExamWithClassGroup
+    public class ExamWithClassGroupDto
     {
         public int ExamId { get; set; }
         public string Title { get; set; } = string.Empty;
@@ -19,6 +19,7 @@ namespace Application.DTOs.Exam
     }
     public class ClassGroupExamResult
     {
+
         public int Score { get; set; }
         public string? Result { get; set; }
     

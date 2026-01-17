@@ -1,13 +1,11 @@
-﻿using Application.DTOs.ClassGroup;
-using Application.DTOs.Exam;
+﻿using Application.DTOs.Exam;
 using Application.Interfaces.IServices;
+using Application.Result;
 using Application.UnitOfWork;
+using AutoMapper;
 using Domain.Models;
-using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Application.Services
@@ -15,242 +13,270 @@ namespace Application.Services
     public class ExamService : IExamService
     {
         private readonly IUnitOfWork _unitOfWork;
-        public ExamService(IUnitOfWork unitOfWork)
+        private readonly IMapper _mapper;
+
+        public ExamService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
-        }
-        public async Task<ExamDTO> CreateExam(ExamDTO exam)
-        {
-            var newExam = new Exam
-            {
-                Title = exam.Title,
-                ExamDate = exam.ExamDate,
-                MaxScore = exam.MaxScore,
-                GroupId = exam.GroupId
-            };
-            await _unitOfWork.Exams.AddAsync(newExam);
-            await _unitOfWork.CommitAsync();
-            return exam;
+            _mapper = mapper;
         }
 
-        public async Task<bool> DeleteExam(int id)
+        public async Task<Result<ExamDto>> CreateExam(ExamDto examDto)
         {
+            // Validate input
+            if (examDto == null)
+            {
+                return Result<ExamDto>.Fail("Exam data cannot be null", 400);
+            }
+
+            if (examDto.GroupId <= 0)
+            {
+                return Result<ExamDto>.Fail("Invalid Group ID", 400);
+            }
+
+            if (string.IsNullOrWhiteSpace(examDto.Title))
+            {
+                return Result<ExamDto>.Fail("Exam title is required", 400);
+            }
+
+            if (examDto.MaxScore <= 0)
+            {
+                return Result<ExamDto>.Fail("Max score must be greater than zero", 400);
+            }
+
+            // Verify that the group exists
+            var groupExists = await _unitOfWork.ClassGroups.GetByIdAsync(examDto.GroupId);
+            if (groupExists == null)
+            {
+                return Result<ExamDto>.Fail($"Class group with ID {examDto.GroupId} not found", 404);
+            }
+
+            // Check for duplicate exam in the same group
+            var isDuplicate = await _unitOfWork.Exams.ExistInGroupAsync(examDto.GroupId, examDto.Title);
+            if (isDuplicate)
+            {
+                return Result<ExamDto>.Fail($"An exam with title '{examDto.Title}' already exists in this group", 409);
+            }
+
+            try
+            {
+                var newExam = _mapper.Map<Exam>(examDto);
+                await _unitOfWork.Exams.AddAsync(newExam);
+                await _unitOfWork.CommitAsync();
+
+                var createdDto = _mapper.Map<ExamDto>(newExam);
+                return Result<ExamDto>.Success(createdDto, 201, "Exam created successfully");
+            }
+            catch (System.Exception ex)
+            {
+                return Result<ExamDto>.Fail($"Error creating exam: {ex.Message}", 500);
+            }
+        }
+
+        public async Task<Result<bool>> DeleteExam(int id)
+        {
+            if (id <= 0)
+            {
+                return Result<bool>.Fail("Invalid exam ID", 400);
+            }
+
             var exam = await _unitOfWork.Exams.GetByIdAsync(id);
             if (exam == null)
             {
-                throw new ValidationException("Exam not found");
-            }
-            _unitOfWork.Exams.Delete(exam);
-            await _unitOfWork.CommitAsync();
-            return true;
-        }
-
-        public async Task<List<ExamWithClassGroup>> GetAllExams()
-        {
-            var exams = await _unitOfWork.Exams.GetAllExamsAsync();
-            var examDtos = exams.Select(e => new ExamWithClassGroup
-            {
-                ExamId = e.ExamId,
-                Title = e.Title,
-                ExamDate = e.ExamDate,
-                MaxScore = e.MaxScore,
-                GroupId = e.GroupId,
-                ClassGroup = new ClassGroupDto
-                {
-                    GroupId = e.ClassGroup.GroupId,
-                    Name = e.ClassGroup.Name,
-                    Room = e.ClassGroup.Room,
-                    Days = e.ClassGroup.Days,
-                    Time = e.ClassGroup.Time,
-                    StartDate = e.ClassGroup.StartDate,
-                    EndDate = e.ClassGroup.EndDate,
-                    CourseName = e.ClassGroup.Course.Title,
-                    InstructorName = e.ClassGroup.Instructor.FullName
-                },
-                ExamResults = e.ExamResults.Select(r => new ClassGroupExamResult
-                {
-                    Score = r.Score,
-                    Result = r.Result
-                }).ToList()
-            }).ToList();
-
-            return examDtos;
-        }
-
-        public async Task<ExamWithClassGroup?> GetExamById(int id)
-        {
-            var exam = await _unitOfWork.Exams.GetByIdAsync(id);
-            if (exam == null)
-            {
-                return null;
+                return Result<bool>.Fail("Exam not found", 404);
             }
 
-            // project to DTO to avoid cycles
-            var dto = new ExamWithClassGroup
+            try
             {
-                ExamId = exam.ExamId,
-                Title = exam.Title,
-                ExamDate = exam.ExamDate,
-                MaxScore = exam.MaxScore,
-                GroupId = exam.GroupId,
-                ClassGroup = exam.ClassGroup != null ? new ClassGroupDto
-                {
-                    GroupId = exam.ClassGroup.GroupId,
-                    Name = exam.ClassGroup.Name,
-                    Room = exam.ClassGroup.Room,
-                    Days = exam.ClassGroup.Days,
-                    Time = exam.ClassGroup.Time,
-                    StartDate = exam.ClassGroup.StartDate,
-                    EndDate = exam.ClassGroup.EndDate,
-                    CourseName = exam.ClassGroup.Course?.Title ?? string.Empty,
-                    InstructorName = exam.ClassGroup.Instructor?.FullName ?? string.Empty
-                } : null,
-                ExamResults = exam.ExamResults?.Select(r => new ClassGroupExamResult
-                {
-                    Score = r.Score,
-                    Result = r.Result
-                }).ToList() ?? new List<ClassGroupExamResult>()
-            };
-
-            return dto;
+                _unitOfWork.Exams.Delete(exam);
+                await _unitOfWork.CommitAsync();
+                return Result<bool>.Success(true, 200, "Exam deleted successfully");
+            }
+            catch (System.Exception ex)
+            {
+                return Result<bool>.Fail($"Error deleting exam: {ex.Message}", 500);
+            }
         }
 
-        public async Task<List<ExamWithClassGroup>> GetExamsByCourseIdAsync(int courseId)
+        public async Task<Result<List<ExamWithClassGroupDto>>> GetAllExams()
         {
-            var exams = await _unitOfWork.Exams.GetExamsByCourseIdAsync(courseId);
-            if (exams == null || !exams.Any())
+            try
             {
-                return new List<ExamWithClassGroup>();
+                var exams = await _unitOfWork.Exams.GetAllExamsAsync();
+                var examDtos = _mapper.Map<List<ExamWithClassGroupDto>>(exams.ToList());
+
+                return Result<List<ExamWithClassGroupDto>>.Success(
+                    examDtos,
+                    200,
+                    examDtos.Count > 0 ? $"Retrieved {examDtos.Count} exam(s)" : "No exams found"
+                );
             }
-
-            var list = exams.Select(e => new ExamWithClassGroup
+            catch (System.Exception ex)
             {
-                ExamId = e.ExamId,
-                Title = e.Title,
-                ExamDate = e.ExamDate,
-                MaxScore = e.MaxScore,
-                GroupId = e.GroupId,
-                ClassGroup = e.ClassGroup != null ? new ClassGroupDto
-                {
-                    GroupId = e.ClassGroup.GroupId,
-                    Name = e.ClassGroup.Name,
-                    Room = e.ClassGroup.Room,
-                    Days = e.ClassGroup.Days,
-                    Time = e.ClassGroup.Time,
-                    StartDate = e.ClassGroup.StartDate,
-                    EndDate = e.ClassGroup.EndDate,
-                    CourseName = e.ClassGroup.Course?.Title ?? string.Empty,
-                    InstructorName = e.ClassGroup.Instructor?.FullName ?? string.Empty
-                } : null,
-                ExamResults = e.ExamResults?.Select(r => new ClassGroupExamResult
-                {
-                    Score = r.Score,
-                    Result = r.Result
-                }).ToList() ?? new List<ClassGroupExamResult>()
-            }).ToList();
-
-            return list;
+                return Result<List<ExamWithClassGroupDto>>.Fail($"Error retrieving exams: {ex.Message}", 500);
+            }
         }
 
-        public async Task<List<ExamWithClassGroup>> GetExamsByGroupIdAsync(int groupId)
+        public async Task<Result<ExamWithClassGroupDto?>> GetExamById(int id)
         {
-            var exams = await _unitOfWork.Exams.GetExamsByGroupIdAsync(groupId);
-            if (exams == null || !exams.Any())
+            if (id <= 0)
             {
-                return new List<ExamWithClassGroup>();
+                return Result<ExamWithClassGroupDto?>.Fail("Invalid exam ID", 400);
             }
 
-            var list = exams.Select(e => new ExamWithClassGroup
+            try
             {
-                ExamId = e.ExamId,
-                Title = e.Title,
-                ExamDate = e.ExamDate,
-                MaxScore = e.MaxScore,
-                GroupId = e.GroupId,
-                ClassGroup = e.ClassGroup != null ? new ClassGroupDto
+                var exam = await _unitOfWork.Exams.GetByIdAsync(id);
+                if (exam == null)
                 {
-                    GroupId = e.ClassGroup.GroupId,
-                    Name = e.ClassGroup.Name,
-                    Room = e.ClassGroup.Room,
-                    Days = e.ClassGroup.Days,
-                    Time = e.ClassGroup.Time,
-                    StartDate = e.ClassGroup.StartDate,
-                    EndDate = e.ClassGroup.EndDate,
-                    CourseName = e.ClassGroup.Course?.Title ?? string.Empty,
-                    InstructorName = e.ClassGroup.Instructor?.FullName ?? string.Empty
-                } : null,
-                ExamResults = e.ExamResults?.Select(r => new ClassGroupExamResult
-                {
-                    Score = r.Score,
-                    Result = r.Result
-                }).ToList() ?? new List<ClassGroupExamResult>()
-            }).ToList();
+                    return Result<ExamWithClassGroupDto?>.Fail("Exam not found", 404);
+                }
 
-            return list;
+                var examDto = _mapper.Map<ExamWithClassGroupDto>(exam);
+                return Result<ExamWithClassGroupDto?>.Success(examDto, 200, "Exam retrieved successfully");
+            }
+            catch (System.Exception ex)
+            {
+                return Result<ExamWithClassGroupDto?>.Fail($"Error retrieving exam: {ex.Message}", 500);
+            }
         }
 
-        public async Task<ExamWithClassGroup?> GetExamWithResultsAsync(int examId)
+        public async Task<Result<List<ExamWithClassGroupDto>>> GetExamsByCourseIdAsync(int courseId)
         {
-            var exam = await _unitOfWork.Exams.GetExamWithResultsAsync(examId);
-            if (exam == null)
+            if (courseId <= 0)
             {
-                return null;
+                return Result<List<ExamWithClassGroupDto>>.Fail("Invalid course ID", 400);
             }
 
-            var dto = new ExamWithClassGroup
+            try
             {
-                ExamId = examId,
-                Title = exam.Title,
-                ExamDate = exam.ExamDate,
-                MaxScore = exam.MaxScore,
-                GroupId = exam.GroupId,
-                ClassGroup = exam.ClassGroup != null ? new ClassGroupDto
-                {
-                    GroupId = exam.ClassGroup.GroupId,
-                    Name = exam.ClassGroup.Name,
-                    Room = exam.ClassGroup.Room,
-                    Days = exam.ClassGroup.Days,
-                    Time = exam.ClassGroup.Time,
-                    StartDate = exam.ClassGroup.StartDate,
-                    EndDate = exam.ClassGroup.EndDate,
-                    CourseName = exam.ClassGroup.Course?.Title ?? string.Empty,
-                    InstructorName = exam.ClassGroup.Instructor?.FullName ?? string.Empty
-                } : new ClassGroupDto
-                {
-                    GroupId = 0,
-                    Name = string.Empty,
-                    Room = string.Empty,
-                    Days = string.Empty,
-                    Time = string.Empty,
-                    StartDate = DateTime.MinValue,
-                    EndDate = null,
-                    CourseName = string.Empty,
-                    InstructorName = string.Empty
-                },
-                ExamResults = exam.ExamResults?.Select(r => new ClassGroupExamResult
-                {
-                    Score = r.Score,
-                    Result = r.Result
-                }).ToList() ?? new List<ClassGroupExamResult>()
-            };
+                var exams = await _unitOfWork.Exams.GetExamsByCourseIdAsync(courseId);
+                var examDtos = _mapper.Map<List<ExamWithClassGroupDto>>(exams.ToList());
 
-            return dto;
+                return Result<List<ExamWithClassGroupDto>>.Success(
+                    examDtos,
+                    200,
+                    examDtos.Count > 0 ? $"Retrieved {examDtos.Count} exam(s) for course" : "No exams found for this course"
+                );
+            }
+            catch (System.Exception ex)
+            {
+                return Result<List<ExamWithClassGroupDto>>.Fail($"Error retrieving exams by course: {ex.Message}", 500);
+            }
         }
 
-        public async Task<ExamDTO> UpdateExam(ExamDTO exam, int id)
+        public async Task<Result<List<ExamWithClassGroupDto>>> GetExamsByGroupIdAsync(int groupId)
         {
-            var existExam =await _unitOfWork.Exams.GetByIdAsync(id);
-            if (existExam == null)
+            if (groupId <= 0)
             {
-                throw new ValidationException("Exam not found");
+                return Result<List<ExamWithClassGroupDto>>.Fail("Invalid group ID", 400);
             }
-            existExam.Title = exam.Title;
-            existExam.ExamDate = exam.ExamDate;
-            existExam.MaxScore = exam.MaxScore;
-            existExam.GroupId = exam.GroupId;
-            _unitOfWork.Exams.Update(existExam);
-            await _unitOfWork.CommitAsync();
-            return exam;
+
+            try
+            {
+                var exams = await _unitOfWork.Exams.GetExamsByGroupIdAsync(groupId);
+                var examDtos = _mapper.Map<List<ExamWithClassGroupDto>>(exams.ToList());
+
+                return Result<List<ExamWithClassGroupDto>>.Success(
+                    examDtos,
+                    200,
+                    examDtos.Count > 0 ? $"Retrieved {examDtos.Count} exam(s) for group" : "No exams found for this group"
+                );
+            }
+            catch (System.Exception ex)
+            {
+                return Result<List<ExamWithClassGroupDto>>.Fail($"Error retrieving exams by group: {ex.Message}", 500);
+            }
+        }
+
+        public async Task<Result<ExamWithClassGroupDto?>> GetExamWithResultsAsync(int examId)
+        {
+            if (examId <= 0)
+            {
+                return Result<ExamWithClassGroupDto?>.Fail("Invalid exam ID", 400);
+            }
+
+            try
+            {
+                var exam = await _unitOfWork.Exams.GetExamWithResultsAsync(examId);
+                if (exam == null)
+                {
+                    return Result<ExamWithClassGroupDto?>.Fail("Exam not found", 404);
+                }
+
+                var examDto = _mapper.Map<ExamWithClassGroupDto>(exam);
+                return Result<ExamWithClassGroupDto?>.Success(
+                    examDto,
+                    200,
+                    $"Exam retrieved with {exam.ExamResults?.Count ?? 0} result(s)"
+                );
+            }
+            catch (System.Exception ex)
+            {
+                return Result<ExamWithClassGroupDto?>.Fail($"Error retrieving exam with results: {ex.Message}", 500);
+            }
+        }
+
+        public async Task<Result<ExamDto>> UpdateExam(ExamDto examDto, int id)
+        {
+            if (id <= 0)
+            {
+                return Result<ExamDto>.Fail("Invalid exam ID", 400);
+            }
+
+            if (examDto == null)
+            {
+                return Result<ExamDto>.Fail("Exam data cannot be null", 400);
+            }
+
+            if (string.IsNullOrWhiteSpace(examDto.Title))
+            {
+                return Result<ExamDto>.Fail("Exam title is required", 400);
+            }
+
+            if (examDto.MaxScore <= 0)
+            {
+                return Result<ExamDto>.Fail("Max score must be greater than zero", 400);
+            }
+
+            try
+            {
+                var existingExam = await _unitOfWork.Exams.GetByIdAsync(id);
+                if (existingExam == null)
+                {
+                    return Result<ExamDto>.Fail("Exam not found", 404);
+                }
+
+                // Check if updating to a title that already exists in the group (excluding current exam)
+                if (existingExam.GroupId == examDto.GroupId && existingExam.Title != examDto.Title)
+                {
+                    var isDuplicate = await _unitOfWork.Exams.ExistInGroupAsync(examDto.GroupId, examDto.Title);
+                    if (isDuplicate)
+                    {
+                        return Result<ExamDto>.Fail($"An exam with title '{examDto.Title}' already exists in this group", 409);
+                    }
+                }
+
+                // If GroupId is being changed, verify the new group exists
+                if (existingExam.GroupId != examDto.GroupId)
+                {
+                    var newGroupExists = await _unitOfWork.ClassGroups.GetByIdAsync(examDto.GroupId);
+                    if (newGroupExists == null)
+                    {
+                        return Result<ExamDto>.Fail($"Class group with ID {examDto.GroupId} not found", 404);
+                    }
+                }
+
+                _mapper.Map(examDto, existingExam);
+                _unitOfWork.Exams.Update(existingExam);
+                await _unitOfWork.CommitAsync();
+
+                return Result<ExamDto>.Success(examDto, 200, "Exam updated successfully");
+            }
+            catch (System.Exception ex)
+            {
+                return Result<ExamDto>.Fail($"Error updating exam: {ex.Message}", 500);
+            }
         }
     }
 }

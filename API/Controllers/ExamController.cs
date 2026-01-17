@@ -1,8 +1,8 @@
 ﻿using Application.DTOs.Exam;
 using Application.Interfaces.IServices;
-using Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace API.Controllers
 {
@@ -11,67 +11,138 @@ namespace API.Controllers
     public class ExamController : BaseController
     {
         private readonly IExamService _examService;
+
         public ExamController(IExamService examService)
         {
             _examService = examService;
         }
 
+        /// <summary>
+        /// Get all exams with their class group information
+        /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetAllExams()
         {
-            var exams = await _examService.GetAllExams();
-            return Ok(exams);
+            var result = await _examService.GetAllExams();
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, new { message = result.Message });
+            }
+
+            return Ok(result.Data);
         }
-        [HttpGet("{id}")]
+
+        /// <summary>
+        /// Get a specific exam by ID
+        /// </summary>
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetExamById(int id)
         {
-            var exam = await _examService.GetExamById(id);
-            return Ok(exam);
+            var result = await _examService.GetExamById(id);
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, new { message = result.Message });
+            }
+
+            return Ok(result.Data);
         }
+
+        /// <summary>
+        /// Create a new exam
+        /// </summary>
         [HttpPost]
-        public async Task<IActionResult> CreateExam([FromBody] ExamDTO exam)
+        public async Task<IActionResult> CreateExam([FromBody] ExamDto exam)
         {
-            var createdExam = await _examService.CreateExam(exam);
-            return Ok(createdExam);
+            var result = await _examService.CreateExam(exam);
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, new { message = result.Message });
+            }
+
+            return StatusCode(201, result.Data);
         }
-        [HttpDelete("{id}")]
+
+        /// <summary>
+        /// Delete an exam by ID
+        /// </summary>
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteExam(int id)
         {
             var result = await _examService.DeleteExam(id);
-            if (result)
+
+            if (!result.IsSuccess)
             {
-                return NoContent();
+                return StatusCode(result.StatusCode, new { message = result.Message });
             }
-            return NotFound();
+
+            return Ok(new { message = result.Message });
         }
-        [HttpPut]
-        public async Task<IActionResult> UpdateExam([FromBody] ExamDTO exam, int id)
+
+        /// <summary>
+        /// Update an existing exam
+        /// </summary>
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> UpdateExam(int id, [FromBody] ExamDto exam)
         {
-            var updatedExam = await _examService.UpdateExam(exam, id);
-            return Ok(updatedExam);
+            var result = await _examService.UpdateExam(exam, id);
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, new { message = result.Message });
+            }
+
+            return Ok(result.Data);
         }
+
+        /// <summary>
+        /// Get all exams for a specific group
+        /// </summary>
         [HttpGet("group/{groupId:int}")]
         public async Task<IActionResult> GetExamsByGroupId(int groupId)
         {
-            var exams = await _examService.GetExamsByGroupIdAsync(groupId);
-            return Ok(exams);
+            var result = await _examService.GetExamsByGroupIdAsync(groupId);
 
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, new { message = result.Message });
+            }
+
+            return Ok(result.Data);
         }
+
+        /// <summary>
+        /// Get all exams for a specific course
+        /// </summary>
         [HttpGet("course/{courseId:int}")]
         public async Task<IActionResult> GetExamsByCourseId(int courseId)
         {
-            var exams = await _examService.GetExamsByCourseIdAsync(courseId);
-            return Ok(exams);
+            var result = await _examService.GetExamsByCourseIdAsync(courseId);
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, new { message = result.Message });
+            }
+
+            return Ok(result.Data);
         }
+
+        /// <summary>
+        /// Get exam with all its results
+        /// </summary>
         [HttpGet("{examId:int}/results")]
         public async Task<IActionResult> GetExamWithResults(int examId)
         {
-            var exam = await _examService.GetExamWithResultsAsync(examId);
-            if (exam == null)
+            var result = await _examService.GetExamWithResultsAsync(examId);
+
+            if (!result.IsSuccess)
             {
-                return NotFound();
+                return StatusCode(result.StatusCode, new { message = result.Message });
             }
-            return Ok(exam);
+
+            return Ok(result.Data);
         }
     }
 }
