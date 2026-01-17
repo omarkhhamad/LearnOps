@@ -3,8 +3,10 @@ using Application.DTOs.Student;
 using Application.DTOs.Instructor;
 using Application.DTOs.Course;
 using Application.DTOs.ClassGroup;
+using Application.DTOs.Exam;
 using Domain.Models;
 using System.Linq;
+
 
 namespace Application.Mappings
 {
@@ -89,6 +91,24 @@ namespace Application.Mappings
             CreateMap<ClassGroup, GroupInfoDto>()
                 .ForMember(dest => dest.GroupName, opt => opt.MapFrom(src => src.Name))
                 .ForMember(dest => dest.StudentsCount, opt => opt.MapFrom(src => src.Enrollments.Count));
+
+            // ============ Exam ==================
+            // Map Exam -> ExamDto and reverse for create/update
+            CreateMap<Exam, ExamDto>();
+            CreateMap<ExamDto, Exam>();
+
+            // Map ExamResult -> ClassGroupExamResult for nested exam results
+            CreateMap<ExamResult, ClassGroupExamResult>();
+
+            // Map Exam -> ExamWithClassGroupDto including nested ClassGroup and ExamResults
+            CreateMap<Exam, ExamWithClassGroupDto>()
+                .ForMember(dest => dest.ExamId, opt => opt.MapFrom(src => src.ExamId))
+                .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
+                .ForMember(dest => dest.ExamDate, opt => opt.MapFrom(src => src.ExamDate))
+                .ForMember(dest => dest.MaxScore, opt => opt.MapFrom(src => src.MaxScore))
+                .ForMember(dest => dest.GroupId, opt => opt.MapFrom(src => src.GroupId))
+                //.ForMember(dest => dest.ClassGroup, opt => opt.MapFrom(src => src.ClassGroup))
+                .ForMember(dest => dest.ExamResults, opt => opt.MapFrom(src => src.ExamResults));
         }
     }
 }

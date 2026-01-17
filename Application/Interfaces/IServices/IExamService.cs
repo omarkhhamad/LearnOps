@@ -10,13 +10,13 @@ namespace Application.Interfaces.IServices
 {
     public interface IExamService
     {
-        Task<ExamDTO> CreateExam(ExamDTO exam);
-        Task<Application.DTOs.Exam.ExamWithClassGroup?> GetExamById(int id);
-        Task<List<ExamWithClassGroup>> GetAllExams();
-        Task<ExamDTO> UpdateExam(ExamDTO exam,int id);
-        Task<bool> DeleteExam(int id);
-        Task<List<ExamWithClassGroup>> GetExamsByGroupIdAsync(int groupId);
-        Task<List<Application.DTOs.Exam.ExamWithClassGroup>> GetExamsByCourseIdAsync(int courseId);
-        Task<Application.DTOs.Exam.ExamWithClassGroup?> GetExamWithResultsAsync(int examId);
+        Task<Result<ExamDto>> CreateExam(ExamDto exam);
+        Task<Result<ExamWithClassGroupDto?>> GetExamById(int id);
+        Task<Result<List<ExamWithClassGroupDto>>> GetAllExams();
+        Task<Result<ExamDto>> UpdateExam(ExamDto exam,int id);
+        Task<Result<bool>> DeleteExam(int id);
+        Task<Result<List<ExamWithClassGroupDto>>> GetExamsByGroupIdAsync(int groupId);
+        Task<Result<List<ExamWithClassGroupDto>>> GetExamsByCourseIdAsync(int courseId);
+        Task<Result<ExamWithClassGroupDto?>> GetExamWithResultsAsync(int examId);
     }
 }

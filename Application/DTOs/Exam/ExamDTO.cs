@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Application.DTOs.Exam
 {
-    public class ExamDTO
+    public class ExamDto
     {
             public string Title { get; set; } = string.Empty;
             public DateTime ExamDate { get; set; }

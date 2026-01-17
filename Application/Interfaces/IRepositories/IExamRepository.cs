@@ -13,5 +13,6 @@ namespace Application.Interfaces.IRepositories
         Task<IEnumerable<Exam>> GetExamsByGroupIdAsync(int groupId);
         Task<IEnumerable<Exam>> GetExamsByCourseIdAsync(int courseId);
         Task<Exam?> GetExamWithResultsAsync(int examId);
+        Task<bool> ExistInGroupAsync(int GroupId , string CourseName);
     }
 }
