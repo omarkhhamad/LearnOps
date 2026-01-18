@@ -98,22 +98,71 @@ namespace Application.Services
             }
         }
 
-        public async Task<Result<List<ExamWithClassGroupDto>>> GetAllExams()
+        public async Task<Result<bool>> DeleteRangeOfExams(int [] examsIds)
+        {
+            try
+                {
+                var examsToDelete = new List<Exam>();
+                foreach (var id in examsIds)
+                {
+                    //examsToDelete.Add(new Exam { ExamId = id });
+                    var exam = await _unitOfWork.Exams.GetByIdAsync(id);
+                    if (exam != null)
+                    {
+                        examsToDelete.Add(exam);
+                    }
+                }
+                await _unitOfWork.Exams.DeleteRange(examsToDelete);
+                await _unitOfWork.CommitAsync();
+                return Result<bool>.Success(true, 200, "Exams deleted successfully");
+            }
+            catch (System.Exception ex)
+            {
+                return Result<bool>.Fail($"Error deleting exams: {ex.Message}", 500);
+            }
+        }
+
+        public async Task<Result<PagedResult<ExamWithClassGroupDto>>> GetAllExams(string? Search,int Page = 1,int PageSize =10)
         {
             try
             {
                 var exams = await _unitOfWork.Exams.GetAllExamsAsync();
-                var examDtos = _mapper.Map<List<ExamWithClassGroupDto>>(exams.ToList());
 
-                return Result<List<ExamWithClassGroupDto>>.Success(
-                    examDtos,
+                Console.WriteLine("========== All Exams Data ==========");
+                Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(exams, new System.Text.Json.JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+                }));
+                Console.WriteLine("====================================");
+
+                var examDtos = _mapper.Map<List<ExamWithClassGroupDto>>(exams.ToList());
+                if (!string.IsNullOrWhiteSpace(Search))
+                {
+                    examDtos = examDtos
+                        .Where(e => e.Title != null && e.Title.ToLower().Contains(Search.ToLower()))
+                        .ToList();
+                }
+                var TotalRecords = examDtos.Count;
+                var taotalPages = (int)Math.Ceiling((double)TotalRecords / (int)PageSize);
+                var PagedExams = examDtos.Skip(((int)Page - 1) * (int)PageSize).Take((int)PageSize).ToList();
+                var pagedResult = new PagedResult<ExamWithClassGroupDto>
+                {
+                    Items = PagedExams,
+                    CurrentPage = Page,
+                    PageSize = PageSize,
+                    TotalRecords = TotalRecords
+                };
+
+                return Result<PagedResult<ExamWithClassGroupDto>>.Success(
+                    pagedResult,
                     200,
                     examDtos.Count > 0 ? $"Retrieved {examDtos.Count} exam(s)" : "No exams found"
                 );
             }
             catch (System.Exception ex)
             {
-                return Result<List<ExamWithClassGroupDto>>.Fail($"Error retrieving exams: {ex.Message}", 500);
+                return Result<PagedResult<ExamWithClassGroupDto>>.Fail($"Error retrieving exams: {ex.Message}", 500);
             }
         }
 
@@ -126,7 +175,7 @@ namespace Application.Services
 
             try
             {
-                var exam = await _unitOfWork.Exams.GetByIdAsync(id);
+                var exam = await _unitOfWork.Exams.GetExamByIdAsync(id);
                 if (exam == null)
                 {
                     return Result<ExamWithClassGroupDto?>.Fail("Exam not found", 404);
@@ -278,5 +327,7 @@ namespace Application.Services
                 return Result<ExamDto>.Fail($"Error updating exam: {ex.Message}", 500);
             }
         }
+
+
     }
 }

@@ -14,5 +14,7 @@ namespace Application.Interfaces.IRepositories
         Task<IEnumerable<Exam>> GetExamsByCourseIdAsync(int courseId);
         Task<Exam?> GetExamWithResultsAsync(int examId);
         Task<bool> ExistInGroupAsync(int GroupId , string CourseName);
+        Task<Exam> GetExamByIdAsync(int Id);
+        Task<bool> DeleteRange(IEnumerable<Exam> entities);
     }
 }
