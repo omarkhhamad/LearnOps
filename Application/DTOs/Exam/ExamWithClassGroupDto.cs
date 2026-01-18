@@ -19,7 +19,7 @@ namespace Application.DTOs.Exam
     }
     public class ClassGroupExamResult
     {
-
+        public string StudentName { get; set; } = string.Empty;
         public int Score { get; set; }
         public string? Result { get; set; }
     

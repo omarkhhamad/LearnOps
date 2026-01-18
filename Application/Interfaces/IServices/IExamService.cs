@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Exam;
+using Application.Result;
 using Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -12,11 +13,12 @@ namespace Application.Interfaces.IServices
     {
         Task<Result<ExamDto>> CreateExam(ExamDto exam);
         Task<Result<ExamWithClassGroupDto?>> GetExamById(int id);
-        Task<Result<List<ExamWithClassGroupDto>>> GetAllExams();
+        Task<Result<PagedResult<ExamWithClassGroupDto>>> GetAllExams(string? Search, int Page, int PageSize);
         Task<Result<ExamDto>> UpdateExam(ExamDto exam,int id);
         Task<Result<bool>> DeleteExam(int id);
         Task<Result<List<ExamWithClassGroupDto>>> GetExamsByGroupIdAsync(int groupId);
         Task<Result<List<ExamWithClassGroupDto>>> GetExamsByCourseIdAsync(int courseId);
         Task<Result<ExamWithClassGroupDto?>> GetExamWithResultsAsync(int examId);
+        Task<Result<bool>> DeleteRangeOfExams(int[] examsIds);
     }
 }

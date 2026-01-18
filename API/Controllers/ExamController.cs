@@ -3,6 +3,7 @@ using Application.Interfaces.IServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using Domain.Models;
 
 namespace API.Controllers
 {
@@ -21,9 +22,9 @@ namespace API.Controllers
         /// Get all exams with their class group information
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetAllExams()
+        public async Task<IActionResult> GetAllExams([FromQuery] string? Search,[FromQuery] int Page = 1,[FromQuery] int PageSize =10)
         {
-            var result = await _examService.GetAllExams();
+            var result = await _examService.GetAllExams(Search,Page,PageSize);
 
             if (!result.IsSuccess)
             {
@@ -130,19 +131,34 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Get exam with all its results
+        /// Delete Multiple Exams by IDs
         /// </summary>
-        [HttpGet("{examId:int}/results")]
-        public async Task<IActionResult> GetExamWithResults(int examId)
+        [HttpDelete("bulk-delete")]
+        public async Task<IActionResult> DeleteRangeOfExams([FromBody] int[] examIds)
         {
-            var result = await _examService.GetExamWithResultsAsync(examId);
-
+            
+            var result = await _examService.DeleteRangeOfExams(examIds);
             if (!result.IsSuccess)
             {
                 return StatusCode(result.StatusCode, new { message = result.Message });
             }
-
-            return Ok(result.Data);
+            return Ok(new { message = result.Message });
         }
+
+        ///// <summary>
+        ///// Get exam with all its results
+        ///// </summary>
+        //[HttpGet("{examId:int}/results")]
+        //public async Task<IActionResult> GetExamWithResults(int examId)
+        //{
+        //    var result = await _examService.GetExamWithResultsAsync(examId);
+
+        //    if (!result.IsSuccess)
+        //    {
+        //        return StatusCode(result.StatusCode, new { message = result.Message });
+        //    }
+
+        //    return Ok(result.Data);
+        //}
     }
 }
