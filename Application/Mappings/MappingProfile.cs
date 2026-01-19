@@ -98,7 +98,15 @@ namespace Application.Mappings
             CreateMap<ExamDto, Exam>();
 
             // Map ExamResult -> ClassGroupExamResult for nested exam results
-            CreateMap<ExamResult, ClassGroupExamResult>();
+            //CreateMap<ExamResult, ClassGroupExamResult>();
+
+            CreateMap<ExamResult, ClassGroupExamResult>()
+            .ForMember(dest => dest.StudentName,
+                opt => opt.MapFrom(src =>
+                    src.Enrollment != null && src.Enrollment.Student != null
+                        ? src.Enrollment.Student.FullName
+                        : "Deleted Student"
+                ));
 
             // Map Exam -> ExamWithClassGroupDto including nested ClassGroup and ExamResults
             CreateMap<Exam, ExamWithClassGroupDto>()

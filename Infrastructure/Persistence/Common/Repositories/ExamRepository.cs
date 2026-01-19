@@ -14,11 +14,53 @@ namespace Infrastructure.Persistence.Common.Repositories
         {
         }
 
+        //public async Task<IEnumerable<Exam>> GetAllExamsAsync()
+        //{
+        //    return await _context.Exams
+        //        .AsNoTracking()
+        //        .Select(e => new Exam
+        //        {
+        //            ExamId = e.ExamId,
+        //            Title = e.Title,
+        //            ExamDate = e.ExamDate,
+        //            MaxScore = e.MaxScore,
+        //            GroupId = e.GroupId,
+        //            ClassGroup = new ClassGroup
+        //            {
+        //                GroupId = e.ClassGroup.GroupId,
+        //                Name = e.ClassGroup.Name,
+        //                Room = e.ClassGroup.Room,
+        //                Days = e.ClassGroup.Days,
+        //                Time = e.ClassGroup.Time,
+        //                StartDate = e.ClassGroup.StartDate,
+        //                EndDate = e.ClassGroup.EndDate,
+        //                CourseId = e.ClassGroup.CourseId,
+        //                InstructorId = e.ClassGroup.InstructorId,
+        //                Course = e.ClassGroup.Course,
+        //                Instructor = e.ClassGroup.Instructor
+        //            },
+        //            ExamResults = e.ExamResults
+        //                .Select(er => new ExamResult
+        //                {
+        //                    ExamResultId = er.ExamResultId,
+        //                    ExamId = er.ExamId,
+        //                    EnrollmentId = er.EnrollmentId,
+        //                    Score = er.Score,
+        //                    Enrollment = new Enrollment
+        //                    {
+        //                        EnrollmentId = er.Enrollment.EnrollmentId,
+        //                        StudentId = er.Enrollment.StudentId,
+        //                        Student = er.Enrollment.Student
+        //                    }
+        //                }).ToList()
+        //        })
+        //        .ToListAsync();
+        //}
+
         public async Task<IEnumerable<Exam>> GetAllExamsAsync()
         {
             return await _context.Exams
                 .AsNoTracking()
-                .AsSplitQuery() // <-- أضف هذا
                 .Include(e => e.ClassGroup)
                     .ThenInclude(g => g.Course)
                 .Include(e => e.ClassGroup)
@@ -28,19 +70,6 @@ namespace Infrastructure.Persistence.Common.Repositories
                         .ThenInclude(en => en.Student)
                 .ToListAsync();
         }
-        //public async Task<IEnumerable<Exam>> GetAllExamsAsync()
-        //{
-        //    return await _context.Exams
-        //        .AsNoTracking()
-        //        .Include(e => e.ClassGroup)
-        //            .ThenInclude(g => g.Course)
-        //        .Include(e => e.ClassGroup)
-        //            .ThenInclude(g => g.Instructor)
-        //        .Include(e => e.ExamResults)
-        //            .ThenInclude(er => er.Enrollment)
-        //                .ThenInclude(en => en.Student)
-        //        .ToListAsync();
-        //}
 
         public async Task<IEnumerable<Exam>> GetExamsByGroupIdAsync(int groupId)
         {
@@ -52,6 +81,8 @@ namespace Infrastructure.Persistence.Common.Repositories
                 .Include(e => e.ClassGroup)
                     .ThenInclude(g => g.Instructor)
                 .Include(e => e.ExamResults)
+                    .ThenInclude(er => er.Enrollment)
+                        .ThenInclude(en => en.Student)
                 .OrderByDescending(e => e.ExamDate)
                 .ToListAsync();
         }
@@ -66,6 +97,8 @@ namespace Infrastructure.Persistence.Common.Repositories
                     .ThenInclude(g => g.Instructor)
                 .Where(e => e.ClassGroup.CourseId == courseId)
                 .Include(e => e.ExamResults)
+                    .ThenInclude(er => er.Enrollment)
+                        .ThenInclude(en => en.Student)
                 .OrderByDescending(e => e.ExamDate)
                 .ToListAsync();
         }
@@ -82,6 +115,8 @@ namespace Infrastructure.Persistence.Common.Repositories
                 .Include(e => e.ClassGroup)
                     .ThenInclude(g => g.Instructor)
                 .Include(e => e.ExamResults)
+                    .ThenInclude(er => er.Enrollment)
+                        .ThenInclude(en => en.Student)
                 .FirstOrDefaultAsync(e => e.ExamId == examId);
         }
 
@@ -108,6 +143,8 @@ namespace Infrastructure.Persistence.Common.Repositories
                 .Include(e => e.ClassGroup)
                     .ThenInclude(g => g.Instructor)
                 .Include(e => e.ExamResults)
+                    .ThenInclude(er => er.Enrollment)
+                        .ThenInclude(en => en.Student)
                 .FirstOrDefaultAsync(e => e.ExamId == id);
         }
 

@@ -103,7 +103,7 @@ namespace Infrastructure.Persistence
                 .WithMany(e => e.ExamResults)
                 .HasForeignKey(er => er.EnrollmentId)
                 .OnDelete(DeleteBehavior.NoAction)
-                .IsRequired();
+               .IsRequired(false);
 
             // ExamResult -> Exam (many-to-one)
             modelBuilder.Entity<ExamResult>()

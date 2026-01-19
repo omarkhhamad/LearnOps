@@ -136,6 +136,16 @@ namespace Application.Services
                 }));
                 Console.WriteLine("====================================");
 
+
+
+                foreach (var exam in exams)
+                {
+                    foreach (var r in exam.ExamResults)
+                    {
+                        Console.WriteLine(r.Enrollment?.Student?.FullName);
+                    }
+                }
+
                 var examDtos = _mapper.Map<List<ExamWithClassGroupDto>>(exams.ToList());
                 if (!string.IsNullOrWhiteSpace(Search))
                 {
