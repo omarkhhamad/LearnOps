@@ -74,20 +74,20 @@ namespace Infrastructure.Persistence
                 .OnDelete(DeleteBehavior.NoAction)
                 .IsRequired();
 
-            // Enrollment -> Certificate (one-to-one, optional)
+            //Enrollment->Certificate(one - to - one, optional)
             modelBuilder.Entity<Enrollment>()
                 .HasOne(e => e.Certificate)
                 .WithOne(c => c.Enrollment)
                 .HasForeignKey<Certificate>(c => c.EnrollmentId)
                 .IsRequired(false);
 
-            // Certificate -> Student (many-to-one, optional)
-            modelBuilder.Entity<Certificate>()
-                .HasOne(c => c.Student)
-                .WithMany(s => s.Certificates)
-                .HasForeignKey(c => c.StudentId)
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.NoAction);
+            //// Certificate -> Student (many-to-one, optional)
+            //modelBuilder.Entity<Certificate>()
+            //    .HasOne(c => c.Student)
+            //    .WithMany(s => s.Certificates)
+            //    .HasForeignKey(c => c.StudentId)
+            //    .IsRequired(false)
+            //    .OnDelete(DeleteBehavior.NoAction);
 
             // Exam -> ClassGroup (many-to-one)
             modelBuilder.Entity<Exam>()
@@ -97,13 +97,6 @@ namespace Infrastructure.Persistence
                 .OnDelete(DeleteBehavior.NoAction)
                 .IsRequired();
 
-            // ExamResult -> Enrollment (many-to-one)
-            modelBuilder.Entity<ExamResult>()
-                .HasOne(er => er.Enrollment)
-                .WithMany(e => e.ExamResults)
-                .HasForeignKey(er => er.EnrollmentId)
-                .OnDelete(DeleteBehavior.NoAction)
-               .IsRequired(false);
 
             // ExamResult -> Exam (many-to-one)
             modelBuilder.Entity<ExamResult>()
@@ -113,8 +106,6 @@ namespace Infrastructure.Persistence
                 .OnDelete(DeleteBehavior.NoAction)
                 .IsRequired();
 
-
-
             // Payment -> Enrollment (many-to-one)
             modelBuilder.Entity<Payment>()
                 .HasOne(p => p.Enrollment)
@@ -122,14 +113,7 @@ namespace Infrastructure.Persistence
                 .HasForeignKey(p => p.EnrollmentId)
                 .OnDelete(DeleteBehavior.NoAction)
                 .IsRequired();
-
-            // Attendance -> Enrollment (many-to-one)
-            modelBuilder.Entity<Attendance>()
-                .HasOne(a => a.Enrollment)
-                .WithMany(e => e.Attendances)
-                .HasForeignKey(a => a.EnrollmentId)
-                .OnDelete(DeleteBehavior.NoAction)
-                .IsRequired();
+ 
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }

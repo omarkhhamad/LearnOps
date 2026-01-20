@@ -127,25 +127,7 @@ namespace Application.Services
             try
             {
                 var exams = await _unitOfWork.Exams.GetAllExamsAsync();
-
-                Console.WriteLine("========== All Exams Data ==========");
-                Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(exams, new System.Text.Json.JsonSerializerOptions
-                {
-                    WriteIndented = true,
-                    ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
-                }));
-                Console.WriteLine("====================================");
-
-
-
-                foreach (var exam in exams)
-                {
-                    foreach (var r in exam.ExamResults)
-                    {
-                        Console.WriteLine(r.Enrollment?.Student?.FullName);
-                    }
-                }
-
+                
                 var examDtos = _mapper.Map<List<ExamWithClassGroupDto>>(exams.ToList());
                 if (!string.IsNullOrWhiteSpace(Search))
                 {

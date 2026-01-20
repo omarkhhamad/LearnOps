@@ -10,8 +10,10 @@
         // Foreign Keys
         public int GroupId { get; set; }
 
+
         // Navigation Properties
         public ClassGroup ClassGroup { get; set; } = null!;
+
         public ICollection<ExamResult> ExamResults { get; set; } = new List<ExamResult>();
     }
 }

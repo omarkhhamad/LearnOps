@@ -1,5 +1,11 @@
 ﻿namespace Domain.Models
 {
+    //public enum AttendanceStatus
+    //{
+    //    Present,
+    //    Absent,
+    //    Late
+    //}
     public class Attendance
     {
         public int AttendanceId { get; set; }
@@ -8,7 +14,6 @@
         public string Status { get; set; } = null!;
 
         // Navigation Properties
-        public Enrollment Enrollment { get; set; }= null!;
 
 
     }

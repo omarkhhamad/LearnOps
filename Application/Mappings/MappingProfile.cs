@@ -103,10 +103,11 @@ namespace Application.Mappings
             CreateMap<ExamResult, ClassGroupExamResult>()
             .ForMember(dest => dest.StudentName,
                 opt => opt.MapFrom(src =>
-                    src.Enrollment != null && src.Enrollment.Student != null
-                        ? src.Enrollment.Student.FullName
+                    src.Student != null
+                        ? src.Student.FullName
                         : "Deleted Student"
                 ));
+
 
             // Map Exam -> ExamWithClassGroupDto including nested ClassGroup and ExamResults
             CreateMap<Exam, ExamWithClassGroupDto>()
@@ -116,7 +117,7 @@ namespace Application.Mappings
                 .ForMember(dest => dest.MaxScore, opt => opt.MapFrom(src => src.MaxScore))
                 .ForMember(dest => dest.GroupId, opt => opt.MapFrom(src => src.GroupId))
                 //.ForMember(dest => dest.ClassGroup, opt => opt.MapFrom(src => src.ClassGroup))
-                .ForMember(dest => dest.ExamResults, opt => opt.MapFrom(src => src.ExamResults));
+                .ForMember(dest => dest.Results, opt => opt.MapFrom(src => src.ExamResults));
         }
     }
 }

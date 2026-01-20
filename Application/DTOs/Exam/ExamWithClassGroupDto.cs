@@ -15,7 +15,7 @@ namespace Application.DTOs.Exam
         public int MaxScore { get; set; }
         public int GroupId { get; set; }
         public ClassGroupDto? ClassGroup { get; set; }
-        public List<ClassGroupExamResult> ExamResults { get; set; } = new List<ClassGroupExamResult>();
+        public List<ClassGroupExamResult> Results { get; set; } = new List<ClassGroupExamResult>();
     }
     public class ClassGroupExamResult
     {
