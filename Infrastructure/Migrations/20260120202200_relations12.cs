@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Infrastructure.Persistence.Migrations
+namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class relations12 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -21,7 +21,9 @@ namespace Infrastructure.Persistence.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DurationWeeks = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    MaxStudents = table.Column<int>(type: "int", nullable: false)
+                    MaxStudents = table.Column<int>(type: "int", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -37,7 +39,9 @@ namespace Infrastructure.Persistence.Migrations
                     FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    HourlyRate = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false)
+                    HourlyRate = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -54,7 +58,9 @@ namespace Infrastructure.Persistence.Migrations
                     Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -74,7 +80,9 @@ namespace Infrastructure.Persistence.Migrations
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CourseId = table.Column<int>(type: "int", nullable: false),
-                    InstructorId = table.Column<int>(type: "int", nullable: false)
+                    InstructorId = table.Column<int>(type: "int", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -84,13 +92,13 @@ namespace Infrastructure.Persistence.Migrations
                         column: x => x.CourseId,
                         principalTable: "Courses",
                         principalColumn: "CourseId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_ClassGroups_Instructors_InstructorId",
                         column: x => x.InstructorId,
                         principalTable: "Instructors",
                         principalColumn: "InstructorId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -101,25 +109,26 @@ namespace Infrastructure.Persistence.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     EnrollmentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StudentId = table.Column<int>(type: "int", nullable: false),
                     GroupId = table.Column<int>(type: "int", nullable: false),
-                    ClassGroupGroupId = table.Column<int>(type: "int", nullable: false)
+                    StudentId = table.Column<int>(type: "int", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Enrollments", x => x.EnrollmentId);
                     table.ForeignKey(
-                        name: "FK_Enrollments_ClassGroups_ClassGroupGroupId",
-                        column: x => x.ClassGroupGroupId,
+                        name: "FK_Enrollments_ClassGroups_GroupId",
+                        column: x => x.GroupId,
                         principalTable: "ClassGroups",
                         principalColumn: "GroupId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Enrollments_Students_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Students",
                         principalColumn: "StudentId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -131,18 +140,17 @@ namespace Infrastructure.Persistence.Migrations
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ExamDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     MaxScore = table.Column<int>(type: "int", nullable: false),
-                    GroupId = table.Column<int>(type: "int", nullable: false),
-                    ClassGroupGroupId = table.Column<int>(type: "int", nullable: false)
+                    GroupId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Exams", x => x.ExamId);
                     table.ForeignKey(
-                        name: "FK_Exams_ClassGroups_ClassGroupGroupId",
-                        column: x => x.ClassGroupGroupId,
+                        name: "FK_Exams_ClassGroups_GroupId",
+                        column: x => x.GroupId,
                         principalTable: "ClassGroups",
                         principalColumn: "GroupId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -153,7 +161,7 @@ namespace Infrastructure.Persistence.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     EnrollmentId = table.Column<int>(type: "int", nullable: false),
                     SessionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -162,8 +170,7 @@ namespace Infrastructure.Persistence.Migrations
                         name: "FK_Attendances_Enrollments_EnrollmentId",
                         column: x => x.EnrollmentId,
                         principalTable: "Enrollments",
-                        principalColumn: "EnrollmentId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "EnrollmentId");
                 });
 
             migrationBuilder.CreateTable(
@@ -183,13 +190,13 @@ namespace Infrastructure.Persistence.Migrations
                         name: "FK_Certificates_Enrollments_EnrollmentId",
                         column: x => x.EnrollmentId,
                         principalTable: "Enrollments",
-                        principalColumn: "EnrollmentId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "EnrollmentId");
                     table.ForeignKey(
                         name: "FK_Certificates_Students_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Students",
-                        principalColumn: "StudentId");
+                        principalColumn: "StudentId",
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -211,35 +218,41 @@ namespace Infrastructure.Persistence.Migrations
                         column: x => x.EnrollmentId,
                         principalTable: "Enrollments",
                         principalColumn: "EnrollmentId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
                 name: "ExamResults",
                 columns: table => new
                 {
-                    ResultId = table.Column<int>(type: "int", nullable: false)
+                    ExamResultId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ExamId = table.Column<int>(type: "int", nullable: false),
                     Score = table.Column<int>(type: "int", nullable: false),
-                    EnrollmentId = table.Column<int>(type: "int", nullable: false),
-                    Result = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Result = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    StudentId = table.Column<int>(type: "int", nullable: false),
+                    ExamId = table.Column<int>(type: "int", nullable: false),
+                    EnrollmentId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ExamResults", x => x.ResultId);
+                    table.PrimaryKey("PK_ExamResults", x => x.ExamResultId);
                     table.ForeignKey(
                         name: "FK_ExamResults_Enrollments_EnrollmentId",
                         column: x => x.EnrollmentId,
                         principalTable: "Enrollments",
-                        principalColumn: "EnrollmentId",
-                        onDelete: ReferentialAction.NoAction);
+                        principalColumn: "EnrollmentId");
                     table.ForeignKey(
                         name: "FK_ExamResults_Exams_ExamId",
                         column: x => x.ExamId,
                         principalTable: "Exams",
                         principalColumn: "ExamId",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ExamResults_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "StudentId",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -269,9 +282,9 @@ namespace Infrastructure.Persistence.Migrations
                 column: "InstructorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Enrollments_ClassGroupGroupId",
+                name: "IX_Enrollments_GroupId",
                 table: "Enrollments",
-                column: "ClassGroupGroupId");
+                column: "GroupId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Enrollments_StudentId",
@@ -289,9 +302,14 @@ namespace Infrastructure.Persistence.Migrations
                 column: "ExamId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Exams_ClassGroupGroupId",
+                name: "IX_ExamResults_StudentId",
+                table: "ExamResults",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Exams_GroupId",
                 table: "Exams",
-                column: "ClassGroupGroupId");
+                column: "GroupId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payments_EnrollmentId",

@@ -4,19 +4,16 @@ using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Infrastructure.Persistence.Migrations
+namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260120185057_edit-relations6")]
-    partial class editrelations6
+    partial class AppDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,9 +36,8 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("SessionDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.HasKey("AttendanceId");
 
@@ -363,11 +359,12 @@ namespace Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Domain.Models.Attendance", b =>
                 {
-                    b.HasOne("Domain.Models.Enrollment", null)
+                    b.HasOne("Domain.Models.Enrollment", "Enrollment")
                         .WithMany("Attendances")
                         .HasForeignKey("EnrollmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Enrollment");
                 });
 
             modelBuilder.Entity("Domain.Models.Certificate", b =>
@@ -376,11 +373,14 @@ namespace Infrastructure.Persistence.Migrations
                         .WithOne("Certificate")
                         .HasForeignKey("Domain.Models.Certificate", "EnrollmentId");
 
-                    b.HasOne("Domain.Models.Student", null)
+                    b.HasOne("Domain.Models.Student", "Student")
                         .WithMany("Certificates")
-                        .HasForeignKey("StudentId");
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Enrollment");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("Domain.Models.ClassGroup", b =>
@@ -388,13 +388,13 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasOne("Domain.Models.Course", "Course")
                         .WithMany("ClassGroups")
                         .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Domain.Models.Instructor", "Instructor")
                         .WithMany("ClassGroups")
                         .HasForeignKey("InstructorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Course");
@@ -407,13 +407,13 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasOne("Domain.Models.ClassGroup", "ClassGroup")
                         .WithMany("Enrollments")
                         .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Domain.Models.Student", "Student")
                         .WithMany("Enrollments")
                         .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("ClassGroup");
@@ -426,7 +426,7 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasOne("Domain.Models.ClassGroup", "ClassGroup")
                         .WithMany("Exams")
                         .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("ClassGroup");
@@ -441,13 +441,13 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasOne("Domain.Models.Exam", "Exam")
                         .WithMany("ExamResults")
                         .HasForeignKey("ExamId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Domain.Models.Student", "Student")
-                        .WithMany()
+                        .WithMany("ExamResults")
                         .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Exam");
@@ -460,7 +460,7 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasOne("Domain.Models.Enrollment", "Enrollment")
                         .WithMany("Payments")
                         .HasForeignKey("EnrollmentId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Enrollment");
@@ -504,6 +504,8 @@ namespace Infrastructure.Persistence.Migrations
                     b.Navigation("Certificates");
 
                     b.Navigation("Enrollments");
+
+                    b.Navigation("ExamResults");
                 });
 #pragma warning restore 612, 618
         }

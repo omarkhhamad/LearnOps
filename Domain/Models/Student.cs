@@ -13,6 +13,7 @@ namespace Domain.Models
         // Navigation Properties
         public ICollection<Certificate>Certificates { get; set; }= new List<Certificate>();
         public ICollection<Enrollment>Enrollments { get; set; }= new List<Enrollment>();
+        public ICollection<ExamResult> ExamResults { get; set; } = new List<ExamResult>();
 
     }
 }

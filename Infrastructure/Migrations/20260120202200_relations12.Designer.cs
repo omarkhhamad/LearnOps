@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Infrastructure.Persistence.Migrations
+namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251227171158_soft-delete4")]
-    partial class softdelete4
+    [Migration("20260120202200_relations12")]
+    partial class relations12
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,9 +39,8 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("SessionDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.HasKey("AttendanceId");
 
@@ -92,11 +91,17 @@ namespace Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("InstructorId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -166,9 +171,6 @@ namespace Infrastructure.Persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EnrollmentId"));
 
-                    b.Property<int>("ClassGroupGroupId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
@@ -190,7 +192,7 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.HasKey("EnrollmentId");
 
-                    b.HasIndex("ClassGroupGroupId");
+                    b.HasIndex("GroupId");
 
                     b.HasIndex("StudentId");
 
@@ -204,9 +206,6 @@ namespace Infrastructure.Persistence.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ExamId"));
-
-                    b.Property<int>("ClassGroupGroupId")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("ExamDate")
                         .HasColumnType("datetime2");
@@ -223,37 +222,41 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.HasKey("ExamId");
 
-                    b.HasIndex("ClassGroupGroupId");
+                    b.HasIndex("GroupId");
 
                     b.ToTable("Exams");
                 });
 
             modelBuilder.Entity("Domain.Models.ExamResult", b =>
                 {
-                    b.Property<int>("ResultId")
+                    b.Property<int>("ExamResultId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ResultId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ExamResultId"));
 
-                    b.Property<int>("EnrollmentId")
+                    b.Property<int?>("EnrollmentId")
                         .HasColumnType("int");
 
                     b.Property<int>("ExamId")
                         .HasColumnType("int");
 
                     b.Property<string>("Result")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Score")
                         .HasColumnType("int");
 
-                    b.HasKey("ResultId");
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ExamResultId");
 
                     b.HasIndex("EnrollmentId");
 
                     b.HasIndex("ExamId");
+
+                    b.HasIndex("StudentId");
 
                     b.ToTable("ExamResults");
                 });
@@ -362,8 +365,7 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasOne("Domain.Models.Enrollment", "Enrollment")
                         .WithMany("Attendances")
                         .HasForeignKey("EnrollmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Enrollment");
                 });
@@ -372,15 +374,16 @@ namespace Infrastructure.Persistence.Migrations
                 {
                     b.HasOne("Domain.Models.Enrollment", "Enrollment")
                         .WithOne("Certificate")
-                        .HasForeignKey("Domain.Models.Certificate", "EnrollmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("Domain.Models.Certificate", "EnrollmentId");
 
-                    b.HasOne("Domain.Models.Student", null)
+                    b.HasOne("Domain.Models.Student", "Student")
                         .WithMany("Certificates")
-                        .HasForeignKey("StudentId");
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Enrollment");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("Domain.Models.ClassGroup", b =>
@@ -388,13 +391,13 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasOne("Domain.Models.Course", "Course")
                         .WithMany("ClassGroups")
                         .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Domain.Models.Instructor", "Instructor")
                         .WithMany("ClassGroups")
                         .HasForeignKey("InstructorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Course");
@@ -406,14 +409,14 @@ namespace Infrastructure.Persistence.Migrations
                 {
                     b.HasOne("Domain.Models.ClassGroup", "ClassGroup")
                         .WithMany("Enrollments")
-                        .HasForeignKey("ClassGroupGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Domain.Models.Student", "Student")
                         .WithMany("Enrollments")
                         .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("ClassGroup");
@@ -425,8 +428,8 @@ namespace Infrastructure.Persistence.Migrations
                 {
                     b.HasOne("Domain.Models.ClassGroup", "ClassGroup")
                         .WithMany("Exams")
-                        .HasForeignKey("ClassGroupGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("ClassGroup");
@@ -434,21 +437,25 @@ namespace Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Domain.Models.ExamResult", b =>
                 {
-                    b.HasOne("Domain.Models.Enrollment", "Enrollment")
+                    b.HasOne("Domain.Models.Enrollment", null)
                         .WithMany("ExamResults")
-                        .HasForeignKey("EnrollmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EnrollmentId");
 
                     b.HasOne("Domain.Models.Exam", "Exam")
                         .WithMany("ExamResults")
                         .HasForeignKey("ExamId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Enrollment");
+                    b.HasOne("Domain.Models.Student", "Student")
+                        .WithMany("ExamResults")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Exam");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("Domain.Models.Payment", b =>
@@ -456,7 +463,7 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasOne("Domain.Models.Enrollment", "Enrollment")
                         .WithMany("Payments")
                         .HasForeignKey("EnrollmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Enrollment");
@@ -478,8 +485,7 @@ namespace Infrastructure.Persistence.Migrations
                 {
                     b.Navigation("Attendances");
 
-                    b.Navigation("Certificate")
-                        .IsRequired();
+                    b.Navigation("Certificate");
 
                     b.Navigation("ExamResults");
 
@@ -501,6 +507,8 @@ namespace Infrastructure.Persistence.Migrations
                     b.Navigation("Certificates");
 
                     b.Navigation("Enrollments");
+
+                    b.Navigation("ExamResults");
                 });
 #pragma warning restore 612, 618
         }
