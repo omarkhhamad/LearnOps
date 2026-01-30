@@ -6,6 +6,7 @@ using Application.Interfaces.IRepositories;
 using Infrastructure.Persistence.Common.Repositories;
 using Application.Mappings;
 using AutoMapper;
+using Infrastructure.Services;
 
 namespace API.Extensions
 {
@@ -20,6 +21,10 @@ namespace API.Extensions
             services.AddScoped<IInstructorService, InstructorService>();
             services.AddScoped<IClassGroupService, ClassGroupService>();
             services.AddScoped<IExamService, ExamService>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddSingleton<IJwtService, JwtService>();
+            services.AddScoped<IUserService,UserService>();
+
             // Repositories
             services.AddScoped<IStudentRepository, StudentRepository>();
             services.AddScoped<ICourseRepository, CourseRepository>();
@@ -27,6 +32,9 @@ namespace API.Extensions
             services.AddScoped<IClassGroupRepository, ClassGroupRepository>();
             services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
             services.AddScoped<IExamRepository, ExamRepository>();
+            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+
         }
     }
 

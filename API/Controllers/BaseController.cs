@@ -13,5 +13,10 @@ namespace API.Controllers
         {
             return StatusCode(result.StatusCode, result);
         }
+
+        protected IActionResult ToActionResult(Application.Result.Result result)
+        {
+            return StatusCode(result.StatusCode ?? 200, result);
+        }
     }
 }

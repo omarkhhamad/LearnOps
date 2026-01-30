@@ -13,21 +13,27 @@ namespace Infrastructure.Persistence.Common.Repositories
         }
         public void DeleteRange(IEnumerable<Instructor> instructors)
         {
-         
+
             foreach (var instructor in instructors)
             {
                 instructor.IsDeleted = true;
                 instructor.DeletedAt = DateTime.UtcNow;
             }
-                _context.Instructors.UpdateRange(instructors);
+            _context.Instructors.UpdateRange(instructors);
         }
 
         public async Task<IEnumerable<Instructor>> GetByIdsAsync(List<int> ids)
         {
-           return await _context.Instructors
-                .Where(i => ids.Contains(i.InstructorId))
-                .ToListAsync();
+            return await _context.Instructors
+                 .Where(i => ids.Contains(i.InstructorId))
+                 .ToListAsync();
         }
+
+        public async Task<Instructor?> GetByUserIdAsync(Guid userId)
+            => await _context.Instructors.FirstOrDefaultAsync(i => i.UserId == userId);
+
+        public async Task<bool> ExistsByUserIdAsync(Guid userId)
+            => await _context.Instructors.AnyAsync(i => i.UserId == userId);
 
         public async Task<Instructor?> GetInstructorWithCoursesAndGroupsAsync(int id)
         {

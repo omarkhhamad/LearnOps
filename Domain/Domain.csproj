@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -11,6 +11,16 @@
     <Folder Include="Enums\" />
     <Folder Include="Interfaces\" />
     <Folder Include="DomainEvents\" />
+  </ItemGroup>
+
+  <ItemGroup>
+	  <PackageReference Include="Azure.Identity" Version="1.17.1" />
+	  <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.10" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.10" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0" />
+	  <PackageReference Include="System.Formats.Asn1" Version="9.0.6" />
+	  <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />
+	  <PackageReference Include="System.Text.Json" Version="10.0.2" />
   </ItemGroup>
 
 </Project>

@@ -40,6 +40,12 @@ namespace Infrastructure.Persistence.Common.Repositories
             _context.Students.UpdateRange(students);
         }
 
+        public async Task<Student?> GetByUserIdAsync(Guid userId)
+            => await _context.Students.FirstOrDefaultAsync(s => s.UserId == userId);
+
+        public async Task<bool> ExistsByUserIdAsync(Guid userId)
+            => await _context.Students.AnyAsync(s => s.UserId == userId);
+
         public async Task<Student?> GetStudentWithCoursesAsync(int studentId)
         {
             return await _context.Students

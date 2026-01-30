@@ -15,7 +15,12 @@ namespace Application.UnitOfWork
         IClassGroupRepository ClassGroups { get; }
         IEnrollmentRepository Enrollments { get; }
         IExamRepository Exams { get; }
+        IUserRepository Users { get; }
+        IRefreshTokenRepository RefreshTokens { get; }
         Task<int> CommitAsync();
+        Task BeginTransactionAsync();
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
     }
 
 }

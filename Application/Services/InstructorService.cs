@@ -14,49 +14,85 @@ namespace Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public InstructorService(IUnitOfWork unitOfWork, IMapper mapper)
+        private readonly IUserService _userService;
+
+        public InstructorService(IUnitOfWork unitOfWork, IMapper mapper, IUserService userService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _userService = userService;
         }
-        public async Task<Result<InstructorDto>> AddInstructor(AddUpdateInstructorDto instructor)
+        public async Task<Result<InstructorDto>> AddInstructor(AddUpdateInstructorDto instructorDto)
         {
-            var newInstructor = _mapper.Map <Instructor>(instructor);
-            await _unitOfWork.Instructors.AddAsync(newInstructor);
-            await _unitOfWork.CommitAsync();
+            try
+            {
+                var user = new ApplicationUser
+                {
+                    FullName = instructorDto.FullName,
+                    Email = instructorDto.Email,
+                    UserName = instructorDto.Email,
+                    PhoneNumber = instructorDto.Phone,
+                    CreatedAt = DateTime.UtcNow
+                };
 
-            var dto = _mapper.Map <InstructorDto>(newInstructor);
+                await _userService.CreateUserAsync(user, "Instructor@123", new List<string> { "Instructor" });
 
-            return Result<InstructorDto>.Success(dto, 201, "Instructor created successfully");
+                var instructor = await _unitOfWork.Instructors.GetByUserIdAsync(user.Id);
+                if (instructor != null)
+                {
+                    instructor.HourlyRate = instructorDto.HourlyRate;
+                    _unitOfWork.Instructors.Update(instructor);
+                    await _unitOfWork.CommitAsync();
+                }
+
+                var dto = _mapper.Map<InstructorDto>(instructor);
+                return Result<InstructorDto>.Success(dto, 201, "Instructor created successfully");
+            }
+            catch (Exception ex)
+            {
+                return Result<InstructorDto>.Fail(ex.Message, 400);
+            }
         }
 
         public async Task<Result<bool>> DeleteInstructor(int id)
         {
-            var instructor = await  _unitOfWork.Instructors.GetByIdAsync(id);
-            if (instructor == null)
+            try
             {
-                return Result<bool>.Fail("Instructor not found", 404);
+                var instructor = await _unitOfWork.Instructors.GetByIdAsync(id);
+                if (instructor != null)
+                {
+                    await _userService.DeleteUserAsync(instructor.UserId);
+                }
+                return Result<bool>.Success(true, 200, "Instructor deleted successfully");
             }
-            _unitOfWork.Instructors.Delete(instructor);
-            await _unitOfWork.CommitAsync();
-            return Result<bool>.Success(true, 200, "Instructor deleted successfully");
+            catch (Exception ex)
+            {
+                return Result<bool>.Fail(ex.Message, 400);
+            }
         }
 
         public async Task<Result<bool>> DeleteInstructors(List<int> ids)
         {
-            var instructors = await _unitOfWork.Instructors.GetByIdsAsync(ids);
-            if (instructors == null || !instructors.Any())
+            try
             {
-                return Result<bool>.Fail("Instructors not found", 404);
+                var instructors = await _unitOfWork.Instructors.GetByIdsAsync(ids);
+                if (instructors != null && instructors.Any())
+                {
+                    var userIds = instructors.Select(i => i.UserId).ToList();
+                    await _userService.DeleteUsersAsync(userIds);
+                }
+
+                return Result<bool>.Success(true, 200, "Instructors deleted successfully");
             }
-            _unitOfWork.Instructors.DeleteRange(instructors);
-            await _unitOfWork.CommitAsync();
-            return Result<bool>.Success(true, 200, "Instructors deleted successfully");
+            catch (Exception ex)
+            {
+                return Result<bool>.Fail(ex.Message, 400);
+            }
         }
 
         public async Task<Result<PagedResult<InstructorDto>>> GetAllInstructors(string? search, int page, int pageSize)
         {
-            var instructors =await  _unitOfWork.Instructors.GetAllAsync();
+            var instructors = await _unitOfWork.Instructors.GetAllAsync();
             if (!string.IsNullOrEmpty(search))
             {
                 instructors = instructors.Where(i => i.FullName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
@@ -85,9 +121,9 @@ namespace Application.Services
 
         public async Task<Result<InstructorDto>> GetInstructorById(int id)
         {
-            var instructor = await  _unitOfWork.Instructors.GetByIdAsync(id);
+            var instructor = await _unitOfWork.Instructors.GetByIdAsync(id);
             if (instructor == null) return Result<InstructorDto>.Fail("Instructor not found", 404);
-            var dto = _mapper.Map <InstructorDto>(instructor);
+            var dto = _mapper.Map<InstructorDto>(instructor);
             return Result<InstructorDto>.Success(dto);
         }
 
@@ -105,7 +141,7 @@ namespace Application.Services
             _unitOfWork.Instructors.Update(existingInstructor);
             await _unitOfWork.CommitAsync();
 
-            var dto = _mapper.Map <InstructorDto>(existingInstructor);
+            var dto = _mapper.Map<InstructorDto>(existingInstructor);
 
             return Result<InstructorDto>.Success(dto, 200, "Instructor updated successfully");
         }

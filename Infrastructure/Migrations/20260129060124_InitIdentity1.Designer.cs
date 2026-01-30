@@ -4,6 +4,7 @@ using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260129060124_InitIdentity1")]
+    partial class InitIdentity1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -360,13 +363,7 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("InstructorId");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
 
                     b.ToTable("Instructors");
                 });
@@ -460,13 +457,7 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("StudentId");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
 
                     b.ToTable("Students");
                 });
@@ -700,17 +691,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("Domain.Models.Instructor", b =>
-                {
-                    b.HasOne("Domain.Models.ApplicationUser", "User")
-                        .WithOne("Instructor")
-                        .HasForeignKey("Domain.Models.Instructor", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Domain.Models.Payment", b =>
                 {
                     b.HasOne("Domain.Models.Enrollment", "Enrollment")
@@ -727,17 +707,6 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Models.ApplicationUser", "User")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Domain.Models.Student", b =>
-                {
-                    b.HasOne("Domain.Models.ApplicationUser", "User")
-                        .WithOne("Student")
-                        .HasForeignKey("Domain.Models.Student", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -797,11 +766,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Models.ApplicationUser", b =>
                 {
-                    b.Navigation("Instructor");
-
                     b.Navigation("RefreshTokens");
-
-                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("Domain.Models.ClassGroup", b =>

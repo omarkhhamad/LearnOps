@@ -1,11 +1,15 @@
-
 using System;
 using System.Reflection;
+using System.Text;
 using API.Extensions;
 using API.Middleware;
+using Application.Options;
+using Domain.Models;
 using Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.IdentityModel.Tokens;
 
 namespace API
 {
@@ -15,9 +19,60 @@ namespace API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // ============================
+            // JWT AUTHENTICATION
+            // ============================
+            builder.Services.Configure<JwtSettings>(
+                builder.Configuration.GetSection(JwtSettings.SectionName)
+            );
 
+            var jwtSettings = builder.Configuration
+             .GetSection(JwtSettings.SectionName)
+             .Get<JwtSettings>()!;
+
+            //var jwtSettings = builder.Co  nfiguration.GetSection("JwtSettings");
+
+            var secretKey = Encoding.UTF8.GetBytes(jwtSettings.Secret);
+
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidAudience = jwtSettings.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(secretKey),
+                    ClockSkew = TimeSpan.Zero // Token expires exactly at expiration time
+                };
+            });
+
+            // ============================
+            // AUTHORIZATION POLICIES
+            // ============================
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminPolicy", policy =>
+                    policy.RequireRole("Admin")); // Only users with Admin role can access
+
+                options.AddPolicy("TeacherPolicy", policy =>
+                    policy.RequireRole("Teacher", "Admin")); // Teacher or Admin roles
+            });
+
+            // ============================
+            // ADD CONTROLLERS & SWAGGER
+            // ============================
             builder.Services.AddControllers();
+            builder.Services.AddEndpointsApiExplorer();
+
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new()
@@ -31,47 +86,95 @@ namespace API
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
 
-
+            // ============================
+            // DATABASE CONTEXT (EF CORE)
+            // ============================
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(
                     builder.Configuration.GetConnectionString("DefaultConnection"),
-                     b => b.MigrationsAssembly("Infrastructure")
-                     .EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null)
+                    b => b.MigrationsAssembly("Infrastructure")
+                          .EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null)
                 )
             );
+            // ============================
+            // ASP.NET IDENTITY CONFIGURATION
+            // ============================
+            builder.Services
+             .AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
+             {
+                 // Password settings
+                 options.Password.RequireDigit = true;
+                 options.Password.RequireLowercase = true;
+                 options.Password.RequireUppercase = true;
+                 options.Password.RequireNonAlphanumeric = false;
+                 options.Password.RequiredLength = 6;
 
+                 // User settings
+                 options.User.RequireUniqueEmail = true;
+             })
+             .AddEntityFrameworkStores<AppDbContext>()
+             .AddDefaultTokenProviders();
+
+
+            // ============================
+            // CUSTOM APPLICATION SERVICES
+            // ============================
             builder.Services.AddApplicationServices();
+
+            // ============================
+            // CORS POLICY
+            // ============================
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowAll",
-                    builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins("https://localhost:3000")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
             });
 
+            // ============================
+            // BUILD APP
+            // ============================
+            var app = builder.Build();
+
+            // ============================
+            // SET HOST URLs
+            // ============================
             builder.WebHost.UseUrls("http://localhost:5093", "https://localhost:7218");
 
-            var app = builder.Build();
+            // ============================
+            // GLOBAL EXCEPTION HANDLING
+            // ============================
             app.UseMiddleware<ExceptionMiddleware>();
 
-            // Configure the HTTP request pipeline.
+            // ============================
+            // MIDDLEWARE PIPELINE
+            // ============================
+            app.UseHttpsRedirection();      // Redirect HTTP to HTTPS
+            app.UseCors("AllowFrontend");    // Enable CORS
+            app.UseAuthentication();        // Enable Authentication
+            app.UseAuthorization();         // Enable Authorization
+
+            // ============================
+            // SWAGGER IN DEVELOPMENT
+            // ============================
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
 
-
-            app.UseCors("AllowAll");
-
-            app.UseHttpsRedirection();
-
-            app.UseAuthorization();
-
-
+            // ============================
+            // MAP CONTROLLERS
+            // ============================
             app.MapControllers();
 
+            // ============================
+            // RUN THE APPLICATION
+            // ============================
             app.Run();
         }
     }

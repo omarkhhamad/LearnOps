@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Domain.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace Infrastructure.Persistence
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -20,6 +22,7 @@ namespace Infrastructure.Persistence
         public DbSet<ExamResult> ExamResults { get; set; } = null!;
         public DbSet<Certificate> Certificates { get; set; } = null!;
         public DbSet<Payment> Payments { get; set; } = null!;
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -44,6 +47,12 @@ namespace Infrastructure.Persistence
             // ===============================
             // Relationships
             // ===============================
+
+            // RefreshToken
+            modelBuilder.Entity<RefreshToken>()
+           .HasOne(rt => rt.User)
+           .WithMany(u => u.RefreshTokens)
+           .HasForeignKey(rt => rt.UserId);
 
             // Enrollment -> ClassGroup (many-to-one)
             modelBuilder.Entity<Enrollment>()
@@ -86,7 +95,7 @@ namespace Infrastructure.Persistence
 
             modelBuilder.Entity<ExamResult>()
                 .HasOne(er => er.Student)
-                .WithMany(s => s.ExamResults) 
+                .WithMany(s => s.ExamResults)
                 .HasForeignKey(er => er.StudentId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
@@ -128,6 +137,20 @@ namespace Infrastructure.Persistence
                 .WithOne(cg => cg.Course)
                 .HasForeignKey(cg => cg.CourseId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // ApplicationUser -> Student (one-to-one)
+            modelBuilder.Entity<ApplicationUser>()
+                .HasOne(u => u.Student)
+                .WithOne(s => s.User)
+                .HasForeignKey<Student>(s => s.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ApplicationUser -> Instructor (one-to-one)
+            modelBuilder.Entity<ApplicationUser>()
+                .HasOne(u => u.Instructor)
+                .WithOne(i => i.User)
+                .HasForeignKey<Instructor>(i => i.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Apply any other configurations automatically
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

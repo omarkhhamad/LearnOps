@@ -22,16 +22,10 @@ namespace API.Controllers
         /// Get all exams with their class group information
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetAllExams([FromQuery] string? Search,[FromQuery] int Page = 1,[FromQuery] int PageSize =10)
+        public async Task<IActionResult> GetAllExams([FromQuery] string? Search, [FromQuery] int Page = 1, [FromQuery] int PageSize = 10)
         {
-            var result = await _examService.GetAllExams(Search,Page,PageSize);
-
-            if (!result.IsSuccess)
-            {
-                return StatusCode(result.StatusCode, new { message = result.Message });
-            }
-
-            return Ok(result.Data);
+            var result = await _examService.GetAllExams(Search, Page, PageSize);
+            return ToActionResult(result);
         }
 
         /// <summary>
@@ -41,13 +35,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetExamById(int id)
         {
             var result = await _examService.GetExamById(id);
-
-            if (!result.IsSuccess)
-            {
-                return StatusCode(result.StatusCode, new { message = result.Message });
-            }
-
-            return Ok(result.Data);
+            return ToActionResult(result);
         }
 
         /// <summary>
@@ -57,13 +45,7 @@ namespace API.Controllers
         public async Task<IActionResult> CreateExam([FromBody] ExamDto exam)
         {
             var result = await _examService.CreateExam(exam);
-
-            if (!result.IsSuccess)
-            {
-                return StatusCode(result.StatusCode, new { message = result.Message });
-            }
-
-            return StatusCode(201, result.Data);
+            return ToActionResult(result);
         }
 
         /// <summary>
@@ -73,13 +55,7 @@ namespace API.Controllers
         public async Task<IActionResult> DeleteExam(int id)
         {
             var result = await _examService.DeleteExam(id);
-
-            if (!result.IsSuccess)
-            {
-                return StatusCode(result.StatusCode, new { message = result.Message });
-            }
-
-            return Ok(new { message = result.Message });
+            return ToActionResult(result);
         }
 
         /// <summary>
@@ -89,13 +65,7 @@ namespace API.Controllers
         public async Task<IActionResult> UpdateExam(int id, [FromBody] ExamDto exam)
         {
             var result = await _examService.UpdateExam(exam, id);
-
-            if (!result.IsSuccess)
-            {
-                return StatusCode(result.StatusCode, new { message = result.Message });
-            }
-
-            return Ok(result.Data);
+            return ToActionResult(result);
         }
 
         /// <summary>
@@ -105,13 +75,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetExamsByGroupId(int groupId)
         {
             var result = await _examService.GetExamsByGroupIdAsync(groupId);
-
-            if (!result.IsSuccess)
-            {
-                return StatusCode(result.StatusCode, new { message = result.Message });
-            }
-
-            return Ok(result.Data);
+            return ToActionResult(result);
         }
 
         /// <summary>
@@ -121,13 +85,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetExamsByCourseId(int courseId)
         {
             var result = await _examService.GetExamsByCourseIdAsync(courseId);
-
-            if (!result.IsSuccess)
-            {
-                return StatusCode(result.StatusCode, new { message = result.Message });
-            }
-
-            return Ok(result.Data);
+            return ToActionResult(result);
         }
 
         /// <summary>
@@ -136,13 +94,8 @@ namespace API.Controllers
         [HttpDelete("bulk-delete")]
         public async Task<IActionResult> DeleteRangeOfExams([FromBody] int[] examIds)
         {
-            
             var result = await _examService.DeleteRangeOfExams(examIds);
-            if (!result.IsSuccess)
-            {
-                return StatusCode(result.StatusCode, new { message = result.Message });
-            }
-            return Ok(new { message = result.Message });
+            return ToActionResult(result);
         }
 
         ///// <summary>

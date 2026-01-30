@@ -16,14 +16,18 @@ namespace Application.UnitOfWork
         public IClassGroupRepository ClassGroups { get; }
         public IEnrollmentRepository Enrollments { get; }
         public IExamRepository Exams { get; }
+        public IRefreshTokenRepository RefreshTokens { get; }
 
+        public IUserRepository Users { get; }
         public UnitOfWork(AppDbContext context,
-                            IStudentRepository studentRepo, 
+                            IStudentRepository studentRepo,
                             ICourseRepository courseRepo,
                             IInstructorRepository instructors,
                             IClassGroupRepository classGroups,
                             IEnrollmentRepository enrollments,
-                            IExamRepository exam)
+                            IExamRepository exam,
+                            IRefreshTokenRepository refreshToken,
+                            IUserRepository users)
         {
             _context = context;
             Students = studentRepo;
@@ -32,11 +36,28 @@ namespace Application.UnitOfWork
             ClassGroups = classGroups;
             Enrollments = enrollments;
             Exams = exam;
+            RefreshTokens = refreshToken;
+            Users = users;
         }
 
         public async Task<int> CommitAsync()
         {
             return await _context.SaveChangesAsync();
+        }
+
+        public async Task BeginTransactionAsync()
+        {
+            await _context.Database.BeginTransactionAsync();
+        }
+
+        public async Task CommitTransactionAsync()
+        {
+            await _context.Database.CommitTransactionAsync();
+        }
+
+        public async Task RollbackTransactionAsync()
+        {
+            await _context.Database.RollbackTransactionAsync();
         }
 
         public void Dispose()
