@@ -66,7 +66,7 @@ namespace Infrastructure.Services
             return Result<UserDto?>.Success(await MapToDtoAsync(user));
         }
 
-        public async Task<Application.Result.Result> CreateUserAsync(ApplicationUser user, string password, List<string> roles)
+        public async Task<Result> CreateUserAsync(ApplicationUser user, string password, List<string> roles)
         {
             await _unitOfWork.BeginTransactionAsync();
             try
@@ -75,7 +75,7 @@ namespace Infrastructure.Services
                 if (!result.Succeeded)
                 {
                     await _unitOfWork.RollbackTransactionAsync();
-                    return Application.Result.Result.Fail(string.Join(", ", result.Errors.Select(e => e.Description)), 400);
+                    return Result.Fail(string.Join(", ", result.Errors.Select(e => e.Description)), 400);
                 }
 
                 if (roles != null && roles.Any())
@@ -84,7 +84,7 @@ namespace Infrastructure.Services
                     if (!roleResult.Succeeded)
                     {
                         await _unitOfWork.RollbackTransactionAsync();
-                        return Application.Result.Result.Fail(string.Join(", ", roleResult.Errors.Select(e => e.Description)), 400);
+                        return Result.Fail(string.Join(", ", roleResult.Errors.Select(e => e.Description)), 400);
                     }
 
                     await SyncProfilesAsync(user.Id, roles);
@@ -92,29 +92,18 @@ namespace Infrastructure.Services
 
                 await _unitOfWork.CommitAsync();
                 await _unitOfWork.CommitTransactionAsync();
-                return Application.Result.Result.Success(201, "User created successfully");
+                return Result.Success(201, "User created successfully");
             }
             catch (Exception ex)
             {
                 await _unitOfWork.RollbackTransactionAsync();
-                return Application.Result.Result.Fail(ex.Message, 500);
+                return Result.Fail(ex.Message, 500);
             }
         }
-
-        public async Task<Application.Result.Result> UpdateUserAsync(ApplicationUser user)
-        {
-            var result = await _userManager.UpdateAsync(user);
-            if (!result.Succeeded)
-                return Application.Result.Result.Fail(string.Join(", ", result.Errors.Select(e => e.Description)), 400);
-
-            await _unitOfWork.CommitAsync();
-            return Application.Result.Result.Success(200, "User updated successfully");
-        }
-
-        public async Task<Application.Result.Result> UpdateUserAsync(Guid id, UserDto dto)
+        public async Task<Result> UpdateUserAsync(Guid id, UserDto dto)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
-            if (user == null) return Application.Result.Result.Fail("User not found", 404);
+            if (user == null) return Result.Fail("User not found", 404);
 
             user.FullName = dto.FullName;
             user.Email = dto.Email;
@@ -123,19 +112,19 @@ namespace Infrastructure.Services
 
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
-                return Application.Result.Result.Fail(string.Join(", ", result.Errors.Select(e => e.Description)), 400);
+                return Result.Fail(string.Join(", ", result.Errors.Select(e => e.Description)), 400);
 
             await _unitOfWork.CommitAsync();
-            return Application.Result.Result.Success(200, "User updated successfully");
+            return Result.Success(200, "User updated successfully");
         }
 
-        public async Task<Application.Result.Result> DeleteUserAsync(Guid id)
+        public async Task<Result> DeleteUserAsync(Guid id)
         {
             await _unitOfWork.BeginTransactionAsync();
             try
             {
                 var user = await _userManager.FindByIdAsync(id.ToString());
-                if (user == null) return Application.Result.Result.Fail("User not found", 404);
+                if (user == null) return Result.Fail("User not found", 404);
 
                 var student = await _unitOfWork.Students.GetByUserIdAsync(id);
                 if (student != null) _unitOfWork.Students.Delete(student);
@@ -147,21 +136,21 @@ namespace Infrastructure.Services
                 if (!result.Succeeded)
                 {
                     await _unitOfWork.RollbackTransactionAsync();
-                    return Application.Result.Result.Fail(string.Join(", ", result.Errors.Select(e => e.Description)), 400);
+                    return Result.Fail(string.Join(", ", result.Errors.Select(e => e.Description)), 400);
                 }
 
                 await _unitOfWork.CommitAsync();
                 await _unitOfWork.CommitTransactionAsync();
-                return Application.Result.Result.Success(200, "User deleted successfully");
+                return Result.Success(200, "User deleted successfully");
             }
             catch (Exception ex)
             {
                 await _unitOfWork.RollbackTransactionAsync();
-                return Application.Result.Result.Fail(ex.Message, 500);
+                return Result.Fail(ex.Message, 500);
             }
         }
 
-        public async Task<Application.Result.Result> DeleteUsersAsync(List<Guid> ids)
+        public async Task<Result> DeleteUsersAsync(List<Guid> ids)
         {
             await _unitOfWork.BeginTransactionAsync();
             try
@@ -181,18 +170,18 @@ namespace Infrastructure.Services
                     if (!result.Succeeded)
                     {
                         await _unitOfWork.RollbackTransactionAsync();
-                        return Application.Result.Result.Fail($"Failed to delete user {id}: " + string.Join(", ", result.Errors.Select(e => e.Description)), 400);
+                        return Result.Fail($"Failed to delete user {id}: " + string.Join(", ", result.Errors.Select(e => e.Description)), 400);
                     }
                 }
 
                 await _unitOfWork.CommitAsync();
                 await _unitOfWork.CommitTransactionAsync();
-                return Application.Result.Result.Success(200, "Users deleted successfully");
+                return Result.Success(200, "Users deleted successfully");
             }
             catch (Exception ex)
             {
                 await _unitOfWork.RollbackTransactionAsync();
-                return Application.Result.Result.Fail(ex.Message, 500);
+                return Result.Fail(ex.Message, 500);
             }
         }
 
@@ -218,13 +207,13 @@ namespace Infrastructure.Services
             return Result<IList<string>>.Success(roles);
         }
 
-        public async Task<Application.Result.Result> UpdateUserRolesAsync(Guid userId, List<string> roles)
+        public async Task<Result> UpdateUserRolesAsync(Guid userId, List<string> roles)
         {
             await _unitOfWork.BeginTransactionAsync();
             try
             {
                 var user = await _userManager.FindByIdAsync(userId.ToString());
-                if (user == null) return Application.Result.Result.Fail("User not found", 404);
+                if (user == null) return Result.Fail("User not found", 404);
 
                 var currentRoles = await _userManager.GetRolesAsync(user);
 
@@ -237,7 +226,7 @@ namespace Infrastructure.Services
                     if (!addResult.Succeeded)
                     {
                         await _unitOfWork.RollbackTransactionAsync();
-                        return Application.Result.Result.Fail(string.Join(", ", addResult.Errors.Select(e => e.Description)), 400);
+                        return Result.Fail(string.Join(", ", addResult.Errors.Select(e => e.Description)), 400);
                     }
                 }
 
@@ -247,7 +236,7 @@ namespace Infrastructure.Services
                     if (!removeResult.Succeeded)
                     {
                         await _unitOfWork.RollbackTransactionAsync();
-                        return Application.Result.Result.Fail(string.Join(", ", removeResult.Errors.Select(e => e.Description)), 400);
+                        return Result.Fail(string.Join(", ", removeResult.Errors.Select(e => e.Description)), 400);
                     }
                 }
 
@@ -255,12 +244,12 @@ namespace Infrastructure.Services
 
                 await _unitOfWork.CommitAsync();
                 await _unitOfWork.CommitTransactionAsync();
-                return Application.Result.Result.Success(200, "User roles updated successfully");
+                return Result.Success(200, "User roles updated successfully");
             }
             catch (Exception ex)
             {
                 await _unitOfWork.RollbackTransactionAsync();
-                return Application.Result.Result.Fail(ex.Message, 500);
+                return Result.Fail(ex.Message, 500);
             }
         }
 

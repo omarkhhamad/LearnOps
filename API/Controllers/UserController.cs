@@ -40,7 +40,6 @@ namespace API.Controllers
             {
                 FullName = dto.FullName,
                 Email = dto.Email,
-                UserName = dto.Email, // Use Email as UserName
                 PhoneNumber = dto.PhoneNumber,
                 CreatedAt = DateTime.UtcNow
             };

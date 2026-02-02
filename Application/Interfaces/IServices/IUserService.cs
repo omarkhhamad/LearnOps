@@ -11,7 +11,6 @@ namespace Application.Interfaces.IServices
         Task<Result<UserDto?>> GetByUsernameAsync(string username);
         Task<Result<UserDto?>> GetByEmailAsync(string email);
         Task<Application.Result.Result> CreateUserAsync(ApplicationUser user, string password, List<string> roles);
-        Task<Application.Result.Result> UpdateUserAsync(ApplicationUser user);
         Task<Application.Result.Result> UpdateUserAsync(Guid id, UserDto dto);
         Task<Application.Result.Result> DeleteUserAsync(Guid id);
         Task<Application.Result.Result> DeleteUsersAsync(List<Guid> ids);

@@ -27,4 +27,22 @@ namespace Application.Result
         public static Result<T> Fail(string message, int statusCode)
             => new(false, default, message, statusCode);
     }
+
+    //public class Result<T> : Result
+    //{
+    //    public T? Data { get; }
+
+    //    private Result(bool isSuccess, T? data, string message, int statusCode)
+    //        : base(isSuccess, message, statusCode)
+    //    {
+    //        Data = data;
+    //    }
+
+    //    public static Result<T> Success(T data, int statusCode = 200, string message = "Success")
+    //        => new(true, data, message, statusCode);
+
+    //    public static Result<T> Fail(string message, int statusCode)
+    //        => new(false, default, message, statusCode);
+    //}
+
 }

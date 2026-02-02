@@ -12,7 +12,6 @@ namespace Domain.Models
         public string FullName { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
-
         public Instructor? Instructor { get; set; }
         public Student? Student { get; set; }
     }
