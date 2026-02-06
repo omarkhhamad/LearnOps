@@ -63,8 +63,6 @@ namespace API
                 options.AddPolicy("AdminPolicy", policy =>
                     policy.RequireRole("Admin")); // Only users with Admin role can access
 
-                options.AddPolicy("TeacherPolicy", policy =>
-                    policy.RequireRole("Teacher", "Admin")); // Teacher or Admin roles
             });
 
             // ============================

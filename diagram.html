@@ -1,142 +1,1105 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
+
 <head>
   <meta charset="UTF-8">
-  <title>LearnOps – ER Diagram</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LearnOps – مخطط قاعدة البيانات</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 
   <!-- Mermaid CDN -->
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <script>
     mermaid.initialize({
       startOnLoad: true,
-      theme: "default"
+      theme: "default",
+      themeVariables: {
+        primaryColor: '#4F46E5',
+        primaryTextColor: '#fff',
+        primaryBorderColor: '#4338CA',
+        lineColor: '#6366F1',
+        secondaryColor: '#10B981',
+        tertiaryColor: '#F59E0B',
+        fontSize: '18px',
+        fontFamily: 'Cairo, Arial, sans-serif'
+      },
+      er: {
+        layoutDirection: 'TB',
+        minEntityWidth: 320, /* جداول عريضة وواضحة */
+        minEntityHeight: 120,
+        entityPadding: 30,
+        stroke: '#4F46E5',
+        fill: '#EEF2FF',
+        fontSize: 18 /* خط كبير للقراءة */
+      }
     });
   </script>
 
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, Helvetica, sans-serif;
-      background-color: #f4f6f8;
-      padding: 20px;
+      font-family: 'Cairo', Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Animated Background Pattern */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header Section */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeInDown 0.8s ease-out;
     }
 
     h1 {
-      text-align: center;
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      margin-bottom: 15px;
+      letter-spacing: -1px;
+    }
+
+    .subtitle {
+      font-size: 1.3rem;
+      color: rgba(255, 255, 255, 0.95);
+      font-weight: 400;
+      margin-bottom: 10px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      padding: 8px 20px;
+      border-radius: 50px;
+      color: white;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-top: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    /* Info Cards */
+    .info-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    .info-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .info-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .info-card h3 {
+      font-size: 1.1rem;
+      color: #4F46E5;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .info-card p {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #1F2937;
+      margin: 0;
+    }
+
+    .info-card .label {
+      font-size: 0.85rem;
+      color: #6B7280;
+      margin-top: 5px;
+    }
+
+    /* Legend Section */
+    .legend {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      animation: fadeInUp 0.8s ease-out 0.3s both;
+    }
+
+    .legend h2 {
+      font-size: 1.5rem;
+      color: #1F2937;
       margin-bottom: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .legend-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: #F9FAFB;
+      border-radius: 8px;
+      transition: background 0.3s ease;
+    }
+
+    .legend-item:hover {
+      background: #F3F4F6;
+    }
+
+    .legend-color {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .legend-color.auth {
+      background: linear-gradient(135deg, #4F46E5, #6366F1);
+    }
+
+    .legend-color.academic {
+      background: linear-gradient(135deg, #10B981, #34D399);
+    }
+
+    .legend-color.student {
+      background: linear-gradient(135deg, #F59E0B, #FBBF24);
+    }
+
+    .legend-color.enrollment {
+      background: linear-gradient(135deg, #EF4444, #F87171);
+    }
+
+    .legend-color.exam {
+      background: linear-gradient(135deg, #8B5CF6, #A78BFA);
+    }
+
+    .legend-text {
+      font-size: 0.95rem;
+      color: #374151;
+      font-weight: 600;
+    }
+
+    /* Project Info Section */
+    .project-info {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      animation: fadeInUp 0.8s ease-out 0.35s both;
+    }
+
+    .info-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .info-header h2 {
+      font-size: 2rem;
+      color: #1F2937;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .info-desc {
+      font-size: 1.1rem;
+      color: #6B7280;
+    }
+
+    /* Tech Stack */
+    .tech-stack {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .tech-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      background: linear-gradient(135deg, #F9FAFB, #F3F4F6);
+      border-radius: 10px;
+      border: 2px solid #E5E7EB;
+      transition: all 0.3s ease;
+    }
+
+    .tech-item:hover {
+      transform: translateY(-3px);
+      border-color: #4F46E5;
+      box-shadow: 0 5px 15px rgba(79, 70, 229, 0.2);
+    }
+
+    .tech-icon {
+      font-size: 2rem;
+    }
+
+    .tech-item strong {
+      display: block;
+      color: #1F2937;
+      font-size: 1rem;
+      margin-bottom: 3px;
+    }
+
+    .tech-item p {
+      color: #6B7280;
+      font-size: 0.85rem;
+      margin: 0;
+    }
+
+    /* Features Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .feature-section {
+      background: #F9FAFB;
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #E5E7EB;
+    }
+
+    .feature-section h3 {
+      font-size: 1.3rem;
+      color: #1F2937;
+      margin-bottom: 15px;
+      font-weight: 700;
+    }
+
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .feature-list li {
+      padding: 8px 0;
+      color: #374151;
+      font-size: 0.95rem;
+      border-bottom: 1px solid #E5E7EB;
+    }
+
+    .feature-list li:last-child {
+      border-bottom: none;
+    }
+
+    .feature-list.completed li {
+      color: #059669;
+      font-weight: 500;
+    }
+
+    /* Architecture Layers */
+    .architecture-layers {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .layer {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px;
+      background: white;
+      border-radius: 8px;
+      border-left: 4px solid #4F46E5;
+      transition: all 0.3s ease;
+    }
+
+    .layer:hover {
+      transform: translateX(5px);
+      box-shadow: 0 3px 10px rgba(79, 70, 229, 0.15);
+    }
+
+    .layer-num {
+      width: 35px;
+      height: 35px;
+      background: linear-gradient(135deg, #4F46E5, #6366F1);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .layer strong {
+      display: block;
+      color: #1F2937;
+      font-size: 1rem;
+      margin-bottom: 3px;
+    }
+
+    .layer p {
+      color: #6B7280;
+      font-size: 0.85rem;
+      margin: 0;
+    }
+
+    /* Database Stats */
+    .db-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .stat-box {
+      background: linear-gradient(135deg, #4F46E5, #6366F1);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+      transition: transform 0.3s ease;
+    }
+
+    .stat-box:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 900;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.95;
+    }
+
+    /* API Endpoints Styles */
+    .api-endpoints {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .endpoints-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+    }
+
+    .endpoint-card {
+      background: #F9FAFB;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #E5E7EB;
+    }
+
+    .card-header {
+      padding: 12px 20px;
+      font-weight: 700;
+      color: white;
+      font-size: 1.1rem;
+    }
+
+    .auth-hdr { background: #4F46E5; }
+    .acad-hdr { background: #10B981; }
+    .people-hdr { background: #F59E0B; }
+    .exam-hdr { background: #8B5CF6; }
+
+    .endpoint-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .endpoint-table tr {
+      border-bottom: 1px solid #E5E7EB;
+    }
+
+    .endpoint-table tr:last-child {
+      border-bottom: none;
+    }
+
+    .endpoint-table th, .endpoint-table td {
+      padding: 10px 15px;
+      text-align: right;
+    }
+
+    .meth {
+        width: 60px;
+        text-align: center !important;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 0.8rem;
+    }
+
+    .get { color: #059669; }
+    .post { color: #4F46E5; }
+    .put { color: #D97706; }
+    .del { color: #DC2626; }
+
+    .addr {
+      font-family: monospace;
+      color: #374151;
+      direction: ltr;
+      text-align: left !important;
+    }
+
+    .desc { color: #6B7280; }
+
+    /* Diagram Container */
+    .diagram-container {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(10px);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      animation: fadeInUp 0.8s ease-out 0.4s both;
+      overflow-x: auto;
     }
 
     .mermaid {
-      background: #ffffff;
+      background: transparent;
       padding: 20px;
+      min-height: 600px;
+      direction: ltr;
+    }
+
+    /* Scrollbar Styling */
+    .diagram-container::-webkit-scrollbar {
+      height: 12px;
+    }
+
+    .diagram-container::-webkit-scrollbar-track {
+      background: #F3F4F6;
       border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .diagram-container::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 10px;
+    }
+
+    .diagram-container::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, #764ba2, #667eea);
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2.5rem;
+      }
+
+      .subtitle {
+        font-size: 1.1rem;
+      }
+
+      .diagram-container {
+        padding: 20px;
+      }
+
+      .info-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: white;
+      }
+
+      .info-cards,
+      .legend {
+        display: none;
+      }
+
+      .diagram-container {
+        box-shadow: none;
+        border: 1px solid #ddd;
+      }
     }
   </style>
 </head>
 
 <body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>🎓 LearnOps</h1>
+      <p class="subtitle">مخطط العلاقات لقاعدة البيانات (ER Diagram)</p>
+      <span class="badge">📊 19 كيان | 22 علاقة | 🔐 ASP.NET Core Identity</span>
+    </div>
 
-  <h1>LearnOps – Database ER Diagram</h1>
+    <!-- Info Cards -->
+    <div class="info-cards">
+      <div class="info-card">
+        <h3>🔐 إدارة المستخدمين والهوية</h3>
+        <p>8</p>
+        <div class="label">ApplicationUser + 6 جداول Identity + RefreshToken</div>
+      </div>
+      <div class="info-card">
+        <h3>📚 البنية الأكاديمية</h3>
+        <p>4</p>
+        <div class="label">Course, ClassGroup, Instructor, Student</div>
+      </div>
+      <div class="info-card">
+        <h3>📝 التسجيل والدفع</h3>
+        <p>3</p>
+        <div class="label">Enrollment, Payment, Attendance</div>
+      </div>
+      <div class="info-card">
+        <h3>🎯 الامتحانات والشهادات</h3>
+        <p>3</p>
+        <div class="label">Exam, ExamResult, Certificate</div>
+      </div>
+    </div>
 
-  <div class="mermaid">
-erDiagram
+    <!-- Legend -->
+    <div class="legend">
+      <h2>🎨 دليل الألوان والمجموعات</h2>
+      <div class="legend-grid">
+        <div class="legend-item">
+          <div class="legend-color auth"></div>
+          <span class="legend-text">🔐 نظام المصادقة</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color academic"></div>
+          <span class="legend-text">📚 البنية الأكاديمية</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color student"></div>
+          <span class="legend-text">👨‍🎓 الطلاب والتسجيل</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color enrollment"></div>
+          <span class="legend-text">💳 الدفعات والحضور</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color exam"></div>
+          <span class="legend-text">📝 الامتحانات والنتائج</span>
+        </div>
+      </div>
+    </div>
 
-    STUDENT ||--o{ ENROLLMENT : enrolls
-    CLASSGROUP ||--o{ ENROLLMENT : has
-    COURSE ||--o{ CLASSGROUP : contains
-    INSTRUCTOR ||--o{ CLASSGROUP : teaches
+    <!-- Project Info Section -->
+    <div class="project-info">
+      <div class="info-header">
+        <h2>📚 معلومات المشروع - LearnOps LMS</h2>
+        <p class="info-desc">نظام إدارة التعلم (Learning Management System) مبني بـ .NET 8 و Clean Architecture</p>
+      </div>
 
-    ENROLLMENT ||--o{ PAYMENT : pays
-    ENROLLMENT ||--o{ ATTENDANCE : records
-    ENROLLMENT ||--|| CERTIFICATE : issues
+      <div class="tech-stack">
+        <div class="tech-item">
+          <span class="tech-icon">🎯</span>
+          <div>
+            <strong>.NET 8</strong>
+            <p>ASP.NET Core Web API</p>
+          </div>
+        </div>
+        <div class="tech-item">
+          <span class="tech-icon">🏗️</span>
+          <div>
+            <strong>Clean Architecture</strong>
+            <p>Domain, Application, Infrastructure, API</p>
+          </div>
+        </div>
+        <div class="tech-item">
+          <span class="tech-icon">🔐</span>
+          <div>
+            <strong>ASP.NET Identity</strong>
+            <p>Authentication & Authorization</p>
+          </div>
+        </div>
+        <div class="tech-item">
+          <span class="tech-icon">💾</span>
+          <div>
+            <strong>Entity Framework Core</strong>
+            <p>SQL Server Database</p>
+          </div>
+        </div>
+      </div>
 
-    CLASSGROUP ||--o{ EXAM : has
-    EXAM ||--o{ EXAMRESULT : produces
-    ENROLLMENT ||--o{ EXAMRESULT : receives
+      <div class="features-grid">
+        <div class="feature-section">
+          <h3>📊 حالة ميزات المشروع</h3>
+          <ul class="feature-list status-list">
+            <li class="done">✅ إدارة الطلاب (Students) - [مكتمل]</li>
+            <li class="done">✅ إدارة المدربين (Instructors) - [مكتمل]</li>
+            <li class="done">✅ إدارة الدورات (Courses) - [مكتمل]</li>
+            <li class="done">✅ المجموعات الدراسية (Class Groups) - [مكتمل]</li>
+            <li class="done">✅ إدارة الامتحانات (Exams) - [مكتمل]</li>
+            <li class="done">✅ نظام المصادقة (Identity & Auth) - [مكتمل]</li>
+            <li class="done">✅ بنية المشروع (Clean Architecture) - [مكتمل]</li>
+            <li class="pending">❌ نظام التسجيل (Enrollment Service/Controller) - [قيد التطوير]</li>
+            <li class="pending">❌ تتبع الدفعات (Payment Logic) - [قيد التطوير]</li>
+            <li class="pending">❌ تسجيل الحضور (Attendance System) - [قيد التطوير]</li>
+            <li class="pending">❌ إصدار الشهادات (Certificate Logic) - [قيد التطوير]</li>
+            <li class="pending">❌ نتائج الامتحانات (Exam Results Management) - [قيد التطوير]</li>
+          </ul>
+        </div>
 
-    STUDENT {
-      int StudentId PK
-      string FullName
-      string Phone
-      string Email
-      date DateOfBirth
-      date CreatedAt
-    }
+        <div class="feature-section">
+          <h3>🏛️ البنية المعمارية المنفذة</h3>
+          <div class="architecture-layers">
+            <div class="layer done-layer">
+              <span class="layer-num">1</span>
+              <div>
+                <strong>Domain Layer</strong>
+                <p>Entities & BaseEntity [Implemented]</p>
+              </div>
+            </div>
+            <div class="layer done-layer">
+              <span class="layer-num">2</span>
+              <div>
+                <strong>Application Layer</strong>
+                <p>Services & IUnitOfWork [Implemented]</p>
+              </div>
+            </div>
+            <div class="layer done-layer">
+              <span class="layer-num">3</span>
+              <div>
+                <strong>Infrastructure Layer</strong>
+                <p>Repositories & DbContext [Implemented]</p>
+              </div>
+            </div>
+            <div class="layer done-layer">
+              <span class="layer-num">4</span>
+              <div>
+                <strong>API Layer</strong>
+                <p>Controllers & Identity [Implemented]</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    COURSE {
-      int CourseId PK
-      string Title
-      string Description
-      int DurationWeeks
-      decimal Price
-      int MaxStudents
-    }
+      <style>
+        .feature-list.status-list li {
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            border: none;
+        }
+        .feature-list.status-list li.done {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            border-right: 4px solid #10B981;
+        }
+        .feature-list.status-list li.pending {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #DC2626;
+            border-right: 4px solid #EF4444;
+        }
+        .done-layer {
+            border-left: 4px solid #10B981 !important;
+        }
+        
+        /* Zoom & Visibility Improvements */
+        .mermaid {
+            margin: 20px auto;
+            width: 100%; /* اجبار الدياجرام على أخذ عرض الصفحة */
+            display: flex;
+            justify-content: center;
+        }
+        .diagram-container {
+            min-height: 1200px;
+            overflow-y: auto;
+            overflow-x: hidden; /* منع السكرول العرضي */
+            border: 3px solid #4F46E5;
+            background-color: #fcfcfc;
+            padding: 20px;
+        }
+      </style>
 
-    INSTRUCTOR {
-      int InstructorId PK
-      string FullName
-      string Phone
-      string Email
-      decimal HourlyRate
-    }
+      <div class="db-stats">
+        <div class="stat-box">
+          <div class="stat-number">19</div>
+          <div class="stat-label">جدول في قاعدة البيانات</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number">22</div>
+          <div class="stat-label">علاقة بين الجداول</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number">8</div>
+          <div class="stat-label">جداول Identity</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number">5</div>
+          <div class="stat-label">جداول بـ Soft Delete</div>
+        </div>
+      </div>
+    </div>
 
-    CLASSGROUP {
-      int GroupId PK
-      string Name
-      string Room
-      string Days
-      string Time
-      date StartDate
-      date EndDate
-      int CourseId FK
-      int InstructorId FK
-    }
+    <!-- API Endpoints Section -->
+    <div class="api-endpoints">
+      <div class="info-header">
+        <h2>🔗 نقاط الوصول (API Endpoints)</h2>
+        <p class="info-desc">توثيق شامل لجميع العمليات المتاحة في النظام</p>
+      </div>
 
-    ENROLLMENT {
-      int EnrollmentId PK
-      date EnrollmentDate
-      string Status
-      int StudentId FK
-      int GroupId FK
-    }
+      <div class="endpoints-grid">
+        <!-- Auth & Identity -->
+        <div class="endpoint-card">
+          <div class="card-header auth-hdr">🔐 Auth & Identity</div>
+          <table class="endpoint-table">
+            <tr><th class="meth post">POST</th><td class="addr">/api/Auth/register</td><td class="desc">تسجيل مستخدم جديد</td></tr>
+            <tr><th class="meth post">POST</th><td class="addr">/api/Auth/login</td><td class="desc">تسجيل الدخول</td></tr>
+            <tr><th class="meth post">POST</th><td class="addr">/api/Auth/refresh</td><td class="desc">تجديد التوكن</td></tr>
+            <tr><th class="meth post">POST</th><td class="addr">/api/Auth/logout/{id}</td><td class="desc">تسجيل الخروج</td></tr>
+            <tr><th class="meth get">GET</th><td class="addr">/api/User</td><td class="desc">عرض جميع المستخدمين</td></tr>
+            <tr><th class="meth post">POST</th><td class="addr">/api/User</td><td class="desc">إضافة مستخدم يدوياً</td></tr>
+            <tr><th class="meth del">DEL</th><td class="addr">/api/User/bulk-delete</td><td class="desc">حذف جماعي للمستخدمين</td></tr>
+          </table>
+        </div>
 
-    PAYMENT {
-      int PaymentId PK
-      decimal Amount
-      date PaymentDate
-      string Method
-      int EnrollmentId FK
-    }
+        <!-- Academic Structure -->
+        <div class="endpoint-card">
+          <div class="card-header acad-hdr">📚 Academic System</div>
+          <table class="endpoint-table">
+            <tr><th class="meth get">GET</th><td class="addr">/api/Course</td><td class="desc">قائمة الكورسات (بحث + صفحات)</td></tr>
+            <tr><th class="meth get">GET</th><td class="addr">/api/Course/{id}</td><td class="desc">تفاصيل الكورس الكاملة</td></tr>
+            <tr><th class="meth get">GET</th><td class="addr">/api/ClassGroup</td><td class="desc">قائمة المجموعات الدراسية</td></tr>
+            <tr><th class="meth get">GET</th><td class="addr">/api/ClassGroup/by-course/{id}</td><td class="desc">مجموعات كورس محدد</td></tr>
+            <tr><th class="meth post">POST</th><td class="addr">/api/Course</td><td class="desc">إضافة كورس جديد</td></tr>
+          </table>
+        </div>
 
-    ATTENDANCE {
-      int AttendanceId PK
-      date SessionDate
-      string Status
-      int EnrollmentId FK
-    }
+        <!-- Students & Instructors -->
+        <div class="endpoint-card">
+          <div class="card-header people-hdr">👥 People Management</div>
+          <table class="endpoint-table">
+            <tr><th class="meth get">GET</th><td class="addr">/api/Student</td><td class="desc">قائمة الطلاب + تفاصيل</td></tr>
+            <tr><th class="meth get">GET</th><td class="addr">/api/Instructor</td><td class="desc">قائمة المدربين + تفاصيل</td></tr>
+            <tr><th class="meth put">PUT</th><td class="addr">/api/Student/{id}</td><td class="desc">تعديل بيانات طالب</td></tr>
+            <tr><th class="meth del">DEL</th><td class="addr">/api/Student/{id}</td><td class="desc">حذف طالب (Soft Delete)</td></tr>
+            <tr><th class="meth del">DEL</th><td class="addr">/api/Student/bulk-delete</td><td class="desc">حذف مجموعة طلاب</td></tr>
+          </table>
+        </div>
 
-    CERTIFICATE {
-      int CertificateId PK
-      date IssuedDate
-      int EnrollmentId FK
-    }
+        <!-- Exams & Results -->
+        <div class="endpoint-card">
+          <div class="card-header exam-hdr">🎯 Exams & Performance</div>
+          <table class="endpoint-table">
+            <tr><th class="meth get">GET</th><td class="addr">/api/Exam</td><td class="desc">عرض جميع الامتحانات</td></tr>
+            <tr><th class="meth get">GET</th><td class="addr">/api/Exam/group/{id}</td><td class="desc">امتحانات مجموعة محددة</td></tr>
+            <tr><th class="meth post">POST</th><td class="addr">/api/Exam</td><td class="desc">إنشاء امتحان جديد</td></tr>
+            <tr><th class="meth put">PUT</th><td class="addr">/api/Exam/{id}</td><td class="desc">تعديل موعد أو تفاصيل امتحان</td></tr>
+            <tr><th class="meth del">DEL</th><td class="addr">/api/Exam/bulk-delete</td><td class="desc">حذف امتحانات بالجملة</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="diagram-container">
+      <div class="mermaid">
+        erDiagram
 
-    EXAM {
-      int ExamId PK
-      string Title
-      date ExamDate
-      int MaxScore
-      int GroupId FK
-    }
+        %% ========================================
+        %% 🔐 Core User Management (Authentication)
+        %% ========================================
+        APPLICATIONUSER ||--o{ REFRESHTOKEN : "has"
+        APPLICATIONUSER ||--o| STUDENT : "is"
+        APPLICATIONUSER ||--o| INSTRUCTOR : "is"
 
-    EXAMRESULT {
-      int ResultId PK
-      int Score
-      string Result
-      int ExamId FK
-      int EnrollmentId FK
-    }
+        %% Identity Framework Tables
+        APPLICATIONUSER ||--o{ ASPNETUSERCLAIMS : "has"
+        APPLICATIONUSER ||--o{ ASPNETUSERLOGINS : "has"
+        APPLICATIONUSER ||--o{ ASPNETUSERTOKENS : "has"
+        APPLICATIONUSER ||--o{ ASPNETUSERROLES : "has"
+
+        ASPNETROLES ||--o{ ASPNETUSERROLES : "assigned"
+        ASPNETROLES ||--o{ ASPNETROLECLAIMS : "has"
+
+        %% ========================================
+        %% 📚 Academic Structure
+        %% ========================================
+        COURSE ||--o{ CLASSGROUP : "contains"
+        INSTRUCTOR ||--o{ CLASSGROUP : "teaches"
+        CLASSGROUP ||--o{ ENROLLMENT : "has"
+        CLASSGROUP ||--o{ EXAM : "schedules"
+
+        %% ========================================
+        %% 👨‍🎓 Student Enrollment
+        %% ========================================
+        STUDENT ||--o{ ENROLLMENT : "enrolls"
+        STUDENT ||--o{ CERTIFICATE : "receives"
+        STUDENT ||--o{ EXAMRESULT : "takes"
+
+        %% ========================================
+        %% 💳 Enrollment Related (Payment & Attendance)
+        %% ========================================
+        ENROLLMENT ||--o{ PAYMENT : "pays"
+        ENROLLMENT ||--o{ ATTENDANCE : "records"
+        ENROLLMENT ||--|| CERTIFICATE : "issues"
+        ENROLLMENT ||--o{ EXAMRESULT : "receives"
+
+        %% ========================================
+        %% 📝 Exam System
+        %% ========================================
+        EXAM ||--o{ EXAMRESULT : "produces"
+
+        %% ========================================
+        %% 🔐 ENTITIES: Authentication & User Management
+        %% ========================================
+
+        APPLICATIONUSER {
+        guid Id PK "🔑 Primary Key"
+        string UserName "👤 Username"
+        string Email "📧 Email Address"
+        string FullName "📝 Full Name"
+        datetime CreatedAt "📅 Created Date"
+        string PasswordHash "🔒 Password Hash"
+        }
+
+        REFRESHTOKEN {
+        guid Id PK "🔑 Primary Key"
+        string Token "🎫 Token String"
+        guid UserId FK "👤 User Reference"
+        datetime Expiration "⏰ Expiry Date"
+        bool IsRevoked "❌ Revoked Status"
+        datetime CreatedAt "📅 Created Date"
+        }
+
+        %% ========================================
+        %% � ENTITIES: ASP.NET Core Identity Tables
+        %% ========================================
+
+        ASPNETROLES {
+        guid Id PK "🔑 Primary Key"
+        string Name "🏷️ Role Name"
+        string NormalizedName "🔤 Normalized Name"
+        string ConcurrencyStamp "🔄 Concurrency Stamp"
+        }
+
+        ASPNETUSERROLES {
+        guid UserId "PK,FK 👤 User Reference"
+        guid RoleId "PK,FK 🏷️ Role Reference"
+        }
+
+        ASPNETUSERCLAIMS {
+        int Id PK "🔑 Primary Key"
+        guid UserId FK "👤 User Reference"
+        string ClaimType "📋 Claim Type"
+        string ClaimValue "📝 Claim Value"
+        }
+
+        ASPNETUSERLOGINS {
+        string LoginProvider PK "🔐 Login Provider"
+        string ProviderKey PK "🔑 Provider Key"
+        guid UserId FK "👤 User Reference"
+        string ProviderDisplayName "📛 Display Name"
+        }
+
+        ASPNETUSERTOKENS {
+        guid UserId "PK,FK 👤 User Reference"
+        string LoginProvider PK "🔐 Login Provider"
+        string Name PK "🏷️ Token Name"
+        string Value "🎫 Token Value"
+        }
+
+        ASPNETROLECLAIMS {
+        int Id PK "🔑 Primary Key"
+        guid RoleId FK "🏷️ Role Reference"
+        string ClaimType "📋 Claim Type"
+        string ClaimValue "📝 Claim Value"
+        }
+
+
+        %% ========================================
+        %% �👥 ENTITIES: People (Students & Instructors)
+        %% ========================================
+
+        STUDENT {
+        int StudentId PK "🔑 Primary Key"
+        string FullName "📝 Full Name"
+        string Phone "📱 Phone Number"
+        string Email "📧 Email Address"
+        date DateOfBirth "🎂 Date of Birth"
+        date CreatedAt "📅 Created Date"
+        guid UserId FK "👤 User Reference"
+        bool IsDeleted "🗑️ Soft Delete Flag"
+        datetime DeletedAt "📅 Deletion Date"
+        }
+
+        INSTRUCTOR {
+        int InstructorId PK "🔑 Primary Key"
+        string FullName "📝 Full Name"
+        string Phone "📱 Phone Number"
+        string Email "📧 Email Address"
+        decimal HourlyRate "💰 Hourly Rate"
+        guid UserId FK "👤 User Reference"
+        bool IsDeleted "🗑️ Soft Delete Flag"
+        datetime DeletedAt "📅 Deletion Date"
+        }
+
+        %% ========================================
+        %% 📚 ENTITIES: Academic Structure
+        %% ========================================
+
+        COURSE {
+        int CourseId PK "🔑 Primary Key"
+        string Title "📖 Course Title"
+        string Description "📄 Description"
+        int DurationWeeks "⏱️ Duration (Weeks)"
+        decimal Price "💵 Course Price"
+        int MaxStudents "👥 Max Students"
+        bool IsDeleted "🗑️ Soft Delete Flag"
+        datetime DeletedAt "📅 Deletion Date"
+        }
+
+        CLASSGROUP {
+        int GroupId PK "🔑 Primary Key"
+        string Name "🏷️ Group Name"
+        string Room "🚪 Room Number"
+        string Days "📅 Class Days"
+        string Time "⏰ Class Time"
+        date StartDate "📅 Start Date"
+        date EndDate "📅 End Date"
+        int CourseId FK "📚 Course Reference"
+        int InstructorId FK "👨‍🏫 Instructor Reference"
+        bool IsDeleted "🗑️ Soft Delete Flag"
+        datetime DeletedAt "📅 Deletion Date"
+        }
+
+        %% ========================================
+        %% 📝 ENTITIES: Enrollment & Related
+        %% ========================================
+
+        ENROLLMENT {
+        int EnrollmentId PK "🔑 Primary Key"
+        date EnrollmentDate "📅 Enrollment Date"
+        string Status "📊 Status"
+        int StudentId FK "👨‍🎓 Student Reference"
+        int GroupId FK "🏷️ Group Reference"
+        bool IsDeleted "🗑️ Soft Delete Flag"
+        datetime DeletedAt "📅 Deletion Date"
+        }
+
+        PAYMENT {
+        int PaymentId PK "🔑 Primary Key"
+        decimal Amount "💰 Payment Amount"
+        date PaymentDate "📅 Payment Date"
+        string Method "💳 Payment Method"
+        int EnrollmentId FK "📝 Enrollment Reference"
+        }
+
+        ATTENDANCE {
+        int AttendanceId PK "🔑 Primary Key"
+        date SessionDate "📅 Session Date"
+        enum Status "✅ Present | ❌ Absent | ⏰ Late"
+        int EnrollmentId FK "📝 Enrollment Reference"
+        }
+
+        CERTIFICATE {
+        int CertificateId PK "🔑 Primary Key"
+        date IssuedDate "📅 Issue Date"
+        int EnrollmentId FK "📝 Enrollment Reference"
+        int StudentId FK "👨‍🎓 Student Reference (Optional)"
+        }
+
+        %% ========================================
+        %% 📝 ENTITIES: Exams & Results
+        %% ========================================
+
+        EXAM {
+        int ExamId PK "🔑 Primary Key"
+        string Title "📖 Exam Title"
+        date ExamDate "📅 Exam Date"
+        int MaxScore "💯 Maximum Score"
+        int GroupId FK "🏷️ Group Reference"
+        }
+
+        EXAMRESULT {
+        int ExamResultId PK "🔑 Primary Key"
+        int Score "📊 Student Score"
+        string Result "✅ Pass/Fail Result"
+        int StudentId FK "👨‍🎓 Student Reference"
+        int ExamId FK "📝 Exam Reference"
+        }
+      </div>
+    </div>
   </div>
-
 </body>
+
 </html>
