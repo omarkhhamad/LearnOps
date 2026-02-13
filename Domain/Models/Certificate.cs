@@ -10,7 +10,7 @@
 
         // Navigation Properties
         public Enrollment Enrollment { get; set; } = null!;
-         public Student? Student { get; set; }
+        public Student? Student { get; set; }
 
     }
 }

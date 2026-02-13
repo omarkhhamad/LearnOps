@@ -29,8 +29,8 @@ namespace Application.Services
                 var user = new ApplicationUser
                 {
                     FullName = instructorDto.FullName,
+                    UserName = instructorDto.UserName,
                     Email = instructorDto.Email,
-                    UserName = instructorDto.Email,
                     PhoneNumber = instructorDto.Phone,
                     CreatedAt = DateTime.UtcNow
                 };
@@ -95,20 +95,16 @@ namespace Application.Services
             var instructors = await _unitOfWork.Instructors.GetAllAsync();
             if (!string.IsNullOrEmpty(search))
             {
-                instructors = instructors.Where(i => i.FullName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                (i.Email != null && i.Email.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
-                i.Phone.Contains(search, StringComparison.OrdinalIgnoreCase)).ToList();
+                instructors = instructors.Where(i =>
+                    (i.User != null && i.User.FullName.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                    (i.User != null && i.User.Email != null && i.User.Email.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                    (i.User != null && i.User.PhoneNumber != null && i.User.PhoneNumber.Contains(search, StringComparison.OrdinalIgnoreCase))
+                ).ToList();
             }
             var totalRecords = instructors.Count();
             var pagedInstructors = instructors.Skip((page - 1) * pageSize).Take(pageSize);
-            var dtos = pagedInstructors.Select(i => new InstructorDto
-            {
-                InstructorId = i.InstructorId,
-                FullName = i.FullName,
-                Phone = i.Phone,
-                Email = i.Email,
-                HourlyRate = i.HourlyRate
-            });
+            var dtos = _mapper.Map<IEnumerable<InstructorDto>>(pagedInstructors);
+
             var pagedResult = new PagedResult<InstructorDto>
             {
                 Items = dtos,
@@ -133,11 +129,20 @@ namespace Application.Services
             if (existingInstructor == null)
                 return Result<InstructorDto>.Fail("Instructor not found", 404);
 
-            existingInstructor.FullName = instructor.FullName;
-            existingInstructor.Phone = instructor.Phone;
-            existingInstructor.Email = instructor.Email;
-            existingInstructor.HourlyRate = instructor.HourlyRate;
+            // Update ApplicationUser fields
+            var userResult = await _userService.GetByIdAsync(existingInstructor.UserId);
+            if (userResult.IsSuccess && userResult.Data != null)
+            {
+                var userDto = userResult.Data;
+                userDto.FullName = instructor.FullName;
+                userDto.UserName = instructor.UserName;
+                userDto.Email = instructor.Email ?? userDto.Email;
+                userDto.PhoneNumber = instructor.Phone;
+                await _userService.UpdateUserAsync(existingInstructor.UserId, userDto);
+            }
 
+            // Update Instructor profile fields
+            existingInstructor.HourlyRate = instructor.HourlyRate;
             _unitOfWork.Instructors.Update(existingInstructor);
             await _unitOfWork.CommitAsync();
 

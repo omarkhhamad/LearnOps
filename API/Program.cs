@@ -159,16 +159,17 @@ namespace API
             // ============================
             // SWAGGER IN DEVELOPMENT
             // ============================
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            //if (app.Environment.IsDevelopment())
+            //{
+            app.UseSwagger();
+            app.UseSwaggerUI();
+            //}
 
             // ============================
             // MAP CONTROLLERS
             // ============================
             app.MapControllers();
+
 
             // ============================
             // RUN THE APPLICATION

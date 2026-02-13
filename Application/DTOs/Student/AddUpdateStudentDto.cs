@@ -11,6 +11,12 @@ namespace Application.DTOs.Student
         [StringLength(100, ErrorMessage = "Full name cannot exceed 100 characters")]
         public string FullName { get; set; } = null!;
 
+        /// <summary>Username</summary>
+        /// <example>mahmoud_taha</example>
+        [Required(ErrorMessage = "Username is required")]
+        [StringLength(50, ErrorMessage = "Username cannot exceed 50 characters")]
+        public string UserName { get; set; } = null!;
+
         /// <summary>Student phone number</summary>
         /// <example>01023140265</example>
         [Required(ErrorMessage = "Phone is required")]

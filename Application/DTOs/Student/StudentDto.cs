@@ -13,6 +13,10 @@ namespace Application.DTOs.Student
         /// <example>Mahmoud Taha</example>
         public string FullName { get; set; } = null!;
 
+        /// <summary>Username</summary>
+        /// <example>mahmoud_taha</example>
+        public string UserName { get; set; } = null!;
+
         /// <summary>Student phone number</summary>
         /// <example>01023140265</example>
         public string Phone { get; set; } = null!;

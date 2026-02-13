@@ -27,21 +27,17 @@ namespace Application.Services
             var students = await _unitOfWork.Students.GetAllAsync();
             if (!string.IsNullOrEmpty(search))
             {
-                students = students.Where(s => s.FullName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                (s.Email != null && s.Email.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
-                s.Phone.Contains(search, StringComparison.OrdinalIgnoreCase)).ToList();
+                students = students.Where(s =>
+                    (s.User != null && s.User.FullName.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                    (s.User != null && s.User.Email != null && s.User.Email.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                    (s.User != null && s.User.PhoneNumber != null && s.User.PhoneNumber.Contains(search, StringComparison.OrdinalIgnoreCase))
+                ).ToList();
             }
             var totalRecords = students.Count();
             var totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
             var pagedStudents = students.Skip((page - 1) * pageSize).Take(pageSize);
-            var dtos = pagedStudents.Select(s => new StudentDto
-            {
-                StudentId = s.StudentId,
-                FullName = s.FullName,
-                Email = s.Email,
-                Phone = s.Phone,
-                DateOfBirth = s.DateOfBirth
-            });
+            var dtos = _mapper.Map<IEnumerable<StudentDto>>(pagedStudents);
+
             var pagedResult = new PagedResult<StudentDto>
             {
                 Items = dtos,
@@ -70,8 +66,8 @@ namespace Application.Services
                 var user = new ApplicationUser
                 {
                     FullName = studentDto.FullName,
+                    UserName = studentDto.UserName,
                     Email = studentDto.Email,
-                    UserName = studentDto.Email,
                     PhoneNumber = studentDto.Phone,
                     CreatedAt = DateTime.UtcNow
                 };
@@ -100,11 +96,20 @@ namespace Application.Services
             var student = await _unitOfWork.Students.GetByIdAsync(id);
             if (student == null) return Result<StudentDto>.Fail("Student not found", 404);
 
-            student.FullName = studentDto.FullName;
-            student.Email = studentDto.Email;
-            student.Phone = studentDto.Phone;
-            student.DateOfBirth = studentDto.DateOfBirth;
+            // Update ApplicationUser fields
+            var userResult = await _userService.GetByIdAsync(student.UserId);
+            if (userResult.IsSuccess && userResult.Data != null)
+            {
+                var userDto = userResult.Data;
+                userDto.FullName = studentDto.FullName;
+                userDto.UserName = studentDto.UserName;
+                userDto.Email = studentDto.Email ?? userDto.Email;
+                userDto.PhoneNumber = studentDto.Phone;
+                await _userService.UpdateUserAsync(student.UserId, userDto);
+            }
 
+            // Update Student profile fields
+            student.DateOfBirth = studentDto.DateOfBirth;
             _unitOfWork.Students.Update(student);
             await _unitOfWork.CommitAsync();
 

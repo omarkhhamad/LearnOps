@@ -14,6 +14,11 @@ namespace Application.DTOs.Instructor
         [StringLength(100, ErrorMessage = "Full name cannot exceed 100 characters")]
         public string FullName { get; set; } = null!;
 
+        /// <summary>Username</summary>
+        [Required(ErrorMessage = "Username is required")]
+        [StringLength(50, ErrorMessage = "Username cannot exceed 50 characters")]
+        public string UserName { get; set; } = null!;
+
         /// <summary>Instructor phone number</summary>
         [Required(ErrorMessage = "Phone is required")]
         [Phone(ErrorMessage = "Invalid phone number format")]

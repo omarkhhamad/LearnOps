@@ -4,7 +4,7 @@ namespace Domain.Models
 {
     public class ExamResult
     {
-    
+
         public int ExamResultId { get; set; }
         public int Score { get; set; }
         public string? Result { get; set; }

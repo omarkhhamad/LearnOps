@@ -130,12 +130,12 @@ namespace Infrastructure.Services
                 var user = new ApplicationUser
                 {
                     Email = request.Email,
-                    UserName = request.Email,
+                    UserName = request.UserName,
                     FullName = request.FullName,
                     CreatedAt = DateTime.UtcNow
                 };
 
-                var roles = request.Roles ?? new List<string> { "User" };
+                var roles = new List<string> { "Student" };
                 var createResult = await _userService.CreateUserAsync(user, request.Password, roles);
                 if (!createResult.IsSuccess)
                     return Result<AuthResponse>.Fail(createResult.Message, createResult.StatusCode ?? 400);

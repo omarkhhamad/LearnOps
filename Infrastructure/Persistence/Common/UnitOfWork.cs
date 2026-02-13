@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Application.Interfaces;
 using Application.Interfaces.IRepositories;
 using Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Application.UnitOfWork
 {
@@ -58,6 +59,11 @@ namespace Application.UnitOfWork
         public async Task RollbackTransactionAsync()
         {
             await _context.Database.RollbackTransactionAsync();
+        }
+
+        public IExecutionStrategy CreateExecutionStrategy()
+        {
+            return _context.Database.CreateExecutionStrategy();
         }
 
         public void Dispose()

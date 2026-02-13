@@ -31,11 +31,18 @@ namespace Infrastructure.Persistence
             // ===============================
             // Global Query Filters for soft delete
             // ===============================
-            modelBuilder.Entity<Student>().HasQueryFilter(s => !s.IsDeleted);
-            modelBuilder.Entity<Instructor>().HasQueryFilter(i => !i.IsDeleted);
-            modelBuilder.Entity<Course>().HasQueryFilter(c => !c.IsDeleted);
-            modelBuilder.Entity<ClassGroup>().HasQueryFilter(cg => !cg.IsDeleted);
-            modelBuilder.Entity<Enrollment>().HasQueryFilter(e => !e.IsDeleted);
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                if (typeof(ISoftDeletable).IsAssignableFrom(entityType.ClrType))
+                {
+                    var parameter = System.Linq.Expressions.Expression.Parameter(entityType.ClrType, "e");
+                    var isDeletedProperty = System.Linq.Expressions.Expression.Property(parameter, nameof(ISoftDeletable.IsDeleted));
+                    var compareExpression = System.Linq.Expressions.Expression.Equal(isDeletedProperty, System.Linq.Expressions.Expression.Constant(false));
+                    var lambda = System.Linq.Expressions.Expression.Lambda(compareExpression, parameter);
+
+                    modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
+                }
+            }
 
             // ===============================
             // Precision for decimals
@@ -140,14 +147,14 @@ namespace Infrastructure.Persistence
 
             // ApplicationUser -> Student (one-to-one)
             modelBuilder.Entity<ApplicationUser>()
-                .HasOne(u => u.Student)
+                .HasOne(u => u.StudentProfile)
                 .WithOne(s => s.User)
                 .HasForeignKey<Student>(s => s.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // ApplicationUser -> Instructor (one-to-one)
             modelBuilder.Entity<ApplicationUser>()
-                .HasOne(u => u.Instructor)
+                .HasOne(u => u.InstructorProfile)
                 .WithOne(i => i.User)
                 .HasForeignKey<Instructor>(i => i.UserId)
                 .OnDelete(DeleteBehavior.Cascade);

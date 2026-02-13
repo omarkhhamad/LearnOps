@@ -11,16 +11,13 @@ namespace Infrastructure.Persistence.Common.Repositories
         public InstructorRepository(AppDbContext context) : base(context)
         {
         }
-        public void DeleteRange(IEnumerable<Instructor> instructors)
-        {
 
-            foreach (var instructor in instructors)
-            {
-                instructor.IsDeleted = true;
-                instructor.DeletedAt = DateTime.UtcNow;
-            }
-            _context.Instructors.UpdateRange(instructors);
-        }
+        public override async Task<IEnumerable<Instructor>> GetAllAsync()
+            => await _context.Instructors.Include(i => i.User).ToListAsync();
+
+        public override async Task<Instructor?> GetByIdAsync(int id)
+            => await _context.Instructors.Include(i => i.User).FirstOrDefaultAsync(i => i.InstructorId == id);
+
 
         public async Task<IEnumerable<Instructor>> GetByIdsAsync(List<int> ids)
         {
@@ -30,7 +27,7 @@ namespace Infrastructure.Persistence.Common.Repositories
         }
 
         public async Task<Instructor?> GetByUserIdAsync(Guid userId)
-            => await _context.Instructors.FirstOrDefaultAsync(i => i.UserId == userId);
+            => await _context.Instructors.Include(i => i.User).FirstOrDefaultAsync(i => i.UserId == userId);
 
         public async Task<bool> ExistsByUserIdAsync(Guid userId)
             => await _context.Instructors.AnyAsync(i => i.UserId == userId);
@@ -38,6 +35,7 @@ namespace Infrastructure.Persistence.Common.Repositories
         public async Task<Instructor?> GetInstructorWithCoursesAndGroupsAsync(int id)
         {
             return await _context.Instructors
+                .Include(i => i.User)
                 .Include(i => i.ClassGroups)
                     .ThenInclude(g => g.Course)
                 .Include(i => i.ClassGroups)

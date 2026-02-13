@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Application.Interfaces.IRepositories;
 using Microsoft.EntityFrameworkCore;
+using Domain.Models;
 
 namespace Infrastructure.Persistence.Common.Repositories
 {
@@ -17,11 +18,16 @@ namespace Infrastructure.Persistence.Common.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public virtual async Task<IEnumerable<T>> GetAllAsync()
             => await _context.Set<T>().ToListAsync();
 
-        public async Task<T?> GetByIdAsync(TKey id)
-            => await _context.Set<T>().FindAsync(id);
+        public virtual async Task<T?> GetByIdAsync(TKey id)
+        {
+            var keyName = _context.Model.FindEntityType(typeof(T))?.FindPrimaryKey()?.Properties.Select(x => x.Name).Single();
+            if (keyName == null) return await _context.Set<T>().FindAsync(id);
+
+            return await _context.Set<T>().FirstOrDefaultAsync(e => object.Equals(EF.Property<TKey>(e, keyName), id));
+        }
 
         public async Task AddAsync(T entity)
             => await _context.Set<T>().AddAsync(entity);
@@ -33,6 +39,25 @@ namespace Infrastructure.Persistence.Common.Repositories
             => _context.Set<T>().Update(entity);
 
         public virtual void Delete(T entity)
-            => _context.Set<T>().Remove(entity);
+        {
+            if (entity is ISoftDeletable softDeletable)
+            {
+                softDeletable.IsDeleted = true;
+                softDeletable.DeletedAt = DateTime.UtcNow;
+                _context.Set<T>().Update(entity);
+            }
+            else
+            {
+                _context.Set<T>().Remove(entity);
+            }
+        }
+
+        public virtual void DeleteRange(IEnumerable<T> entities)
+        {
+            foreach (var entity in entities)
+            {
+                Delete(entity);
+            }
+        }
     }
 }

@@ -18,8 +18,10 @@ namespace Infrastructure.Persistence.Common.Repositories
             return await _context.ClassGroups
                 .Include(cg => cg.Course)
                 .Include(cg => cg.Instructor)
+                    .ThenInclude(i => i.User)
                 .Include(cg => cg.Enrollments)
                     .ThenInclude(e => e.Student)
+                        .ThenInclude(s => s.User)
                 .Where(cg => !cg.IsDeleted)
                 .ToListAsync();
         }
@@ -29,9 +31,11 @@ namespace Infrastructure.Persistence.Common.Repositories
             return await _context.ClassGroups
                 .Where(cg => ids.Contains(cg.GroupId))
                 .Include(cg => cg.Course)
-                 .Include(cg => cg.Instructor)
-                   .Include(cg => cg.Enrollments)
+                .Include(cg => cg.Instructor)
+                    .ThenInclude(i => i.User)
+                .Include(cg => cg.Enrollments)
                     .ThenInclude(e => e.Student)
+                        .ThenInclude(s => s.User)
                 .ToListAsync();
         }
 
@@ -40,19 +44,22 @@ namespace Infrastructure.Persistence.Common.Repositories
             return await _context.ClassGroups
                 .Include(cg => cg.Course)
                 .Include(cg => cg.Instructor)
+                    .ThenInclude(i => i.User)
                 .Include(cg => cg.Enrollments)
                     .ThenInclude(e => e.Student)
+                        .ThenInclude(s => s.User)
                 .FirstOrDefaultAsync(cg => cg.GroupId == id && !cg.IsDeleted);
         }
-
-
 
         public async Task<IEnumerable<ClassGroup>> GetGroupsByCourseIdWithDetails(int courseId)
         {
             return await _context.ClassGroups
+                .Include(g => g.Course)
                 .Include(g => g.Instructor)
+                    .ThenInclude(i => i.User)
                 .Include(g => g.Enrollments)
                     .ThenInclude(e => e.Student)
+                        .ThenInclude(s => s.User)
                 .Where(g => g.CourseId == courseId)
                 .ToListAsync();
         }

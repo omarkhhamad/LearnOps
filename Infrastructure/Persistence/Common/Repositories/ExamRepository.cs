@@ -19,8 +19,10 @@ namespace Infrastructure.Persistence.Common.Repositories
                        .ThenInclude(g => g.Course)
                    .Include(e => e.ClassGroup)
                        .ThenInclude(g => g.Instructor)
+                            .ThenInclude(i => i.User)
                    .Include(e => e.ExamResults)
-                       .ThenInclude(er => er.Student);
+                       .ThenInclude(er => er.Student)
+                            .ThenInclude(s => s.User);
         }
 
         public async Task<IEnumerable<Exam>> GetAllExamsAsync()

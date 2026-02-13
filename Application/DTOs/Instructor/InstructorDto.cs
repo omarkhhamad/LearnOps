@@ -15,6 +15,9 @@ namespace Application.DTOs.Instructor
         /// <summary>Instructor full name</summary>
         public string FullName { get; set; } = null!;
 
+        /// <summary>Username</summary>
+        public string UserName { get; set; } = null!;
+
         /// <summary>Instructor phone number</summary>
         public string Phone { get; set; } = null!;
 

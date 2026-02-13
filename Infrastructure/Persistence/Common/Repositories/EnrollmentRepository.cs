@@ -17,6 +17,7 @@ namespace Infrastructure.Persistence.Common.Repositories
                     .ThenInclude(g => g.Course)
                 .Include(e => e.ClassGroup)
                     .ThenInclude(g => g.Instructor)
+                        .ThenInclude(i => i.User)
                 .Where(e => e.StudentId == studentId)
                 .ToListAsync();
         }

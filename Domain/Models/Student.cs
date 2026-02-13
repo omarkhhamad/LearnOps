@@ -1,20 +1,16 @@
 ﻿
 namespace Domain.Models
 {
-    public class Student: BaseEntity
+    public class Student : BaseEntity
     {
         public int StudentId { get; set; }
-        public string FullName { get; set; } = null!;
-        public string Phone { get; set; } = null!;
-        public string? Email { get; set; }
         public DateTime DateOfBirth { get; set; }
-        public DateTime CreatedAt { get; set; }
 
         // Navigation Properties
         public Guid UserId { get; set; }
         public ApplicationUser User { get; set; } = null!;
-        public ICollection<Certificate>Certificates { get; set; }= new List<Certificate>();
-        public ICollection<Enrollment>Enrollments { get; set; }= new List<Enrollment>();
+        public ICollection<Certificate> Certificates { get; set; } = new List<Certificate>();
+        public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
         public ICollection<ExamResult> ExamResults { get; set; } = new List<ExamResult>();
 
     }

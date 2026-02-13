@@ -21,8 +21,17 @@ namespace Application.Mappings
             CreateMap<AddUpdateClassGroupDto, ClassGroup>();
 
             // ============ Student ============
-            CreateMap<Student, StudentDto>();
+            CreateMap<Student, StudentDto>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User.FullName))
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email))
+                .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.User.PhoneNumber))
+                .ForMember(dest => dest.DateOfBirth, opt => opt.MapFrom(src => src.DateOfBirth));
+
             CreateMap<Student, StudentDetailedDto>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User.FullName))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email))
+                .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.User.PhoneNumber))
                 .ForMember(dest => dest.Courses, opt => opt.MapFrom(src => src.Enrollments));
 
             CreateMap<Enrollment, StudentCourseGroupDto>()
@@ -32,8 +41,17 @@ namespace Application.Mappings
                 .ForMember(dest => dest.GroupName, opt => opt.MapFrom(src => src.ClassGroup.Name));
 
             // ============ Instructor ============
-            CreateMap<Instructor, InstructorDto>();
+            CreateMap<Instructor, InstructorDto>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User.FullName))
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email))
+                .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.User.PhoneNumber))
+                .ForMember(dest => dest.HourlyRate, opt => opt.MapFrom(src => src.HourlyRate));
+
             CreateMap<Instructor, InstructorDetailedDto>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User.FullName))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email))
+                .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.User.PhoneNumber))
                 .ForMember(dest => dest.Courses, opt => opt.MapFrom(src =>
                     src.ClassGroups.GroupBy(g => g.Course)
                        .Select(g => new CourseWithGroupsDto
@@ -72,7 +90,7 @@ namespace Application.Mappings
                 .ForMember(dest => dest.CourseName,
                     opt => opt.MapFrom(src => src.Course != null ? src.Course.Title : null))
                 .ForMember(dest => dest.InstructorName,
-                    opt => opt.MapFrom(src => src.Instructor != null ? src.Instructor.FullName : null))
+                    opt => opt.MapFrom(src => src.Instructor != null && src.Instructor.User != null ? src.Instructor.User.FullName : null))
                 .ForMember(dest => dest.StudentsCount,
                     opt => opt.MapFrom(src => src.Enrollments.Count));
 
@@ -103,8 +121,8 @@ namespace Application.Mappings
             CreateMap<ExamResult, ClassGroupExamResult>()
             .ForMember(dest => dest.StudentName,
                 opt => opt.MapFrom(src =>
-                    src.Student != null
-                        ? src.Student.FullName
+                    src.Student != null && src.Student.User != null
+                        ? src.Student.User.FullName
                         : "Deleted Student"
                 ));
 
