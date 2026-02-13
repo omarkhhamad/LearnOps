@@ -1,6 +1,6 @@
-﻿using Application.DTOs.Exam;
+using Application.DTOs.Exam;
 using Application.Interfaces.IServices;
-using Application.Result;
+using Application.Bases;
 using Application.UnitOfWork;
 using AutoMapper;
 using Domain.Models;

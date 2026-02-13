@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.IServices;
+using Application.Interfaces.IServices;
 using Application.Services;
 using Application.UnitOfWork;
 using Microsoft.AspNetCore.Cors.Infrastructure;
@@ -21,9 +21,10 @@ namespace API.Extensions
             services.AddScoped<IInstructorService, InstructorService>();
             services.AddScoped<IClassGroupService, ClassGroupService>();
             services.AddScoped<IExamService, ExamService>();
-            services.AddScoped<IAuthService, AuthService>();
-            services.AddSingleton<IJwtService, JwtService>();
-            services.AddScoped<IUserService,UserService>();
+            // Authentication Services
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
+            services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IUserService, UserService>();
 
             // Repositories
             services.AddScoped<IStudentRepository, StudentRepository>();

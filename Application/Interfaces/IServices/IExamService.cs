@@ -1,5 +1,5 @@
-﻿using Application.DTOs.Exam;
-using Application.Result;
+using Application.DTOs.Exam;
+using Application.Bases;
 using Domain.Models;
 using System;
 using System.Collections.Generic;

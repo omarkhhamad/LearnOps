@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Application.DTOs.ClassGroup;
 using Application.DTOs.Instructor;
-using Application.Result;
+using Application.Bases;
 using Domain.Models;
 namespace Application.Interfaces.IServices
 {

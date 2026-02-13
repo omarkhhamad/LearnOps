@@ -1,9 +1,9 @@
-﻿using Application.Interfaces.IServices;
+using Application.Interfaces.IServices;
 using Application.UnitOfWork;
 using Domain.Models;
 using Microsoft.AspNetCore.Identity;
-using Application.Result;
-using Application.DTOs.Auth;
+using Application.Bases;
+using Application.DTOs.Authentication;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services

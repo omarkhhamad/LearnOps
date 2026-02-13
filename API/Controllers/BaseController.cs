@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Application.Result;
+using Microsoft.AspNetCore.Mvc;
+using Application.Bases;
 
 namespace API.Controllers
 {
@@ -14,7 +14,7 @@ namespace API.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        protected IActionResult ToActionResult(Application.Result.Result result)
+        protected IActionResult ToActionResult(Application.Bases.Result result)
         {
             return StatusCode(result.StatusCode ?? 200, result);
         }

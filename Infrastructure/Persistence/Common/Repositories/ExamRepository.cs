@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.IRepositories;
+using Application.Interfaces.IRepositories;
 using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;

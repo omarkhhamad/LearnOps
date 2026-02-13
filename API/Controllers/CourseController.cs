@@ -1,6 +1,6 @@
-﻿using Application.DTOs.Course;
+using Application.DTOs.Course;
 using Application.Interfaces.IServices;
-using Application.Result;
+using Application.Bases;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

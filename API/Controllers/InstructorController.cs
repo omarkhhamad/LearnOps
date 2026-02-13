@@ -1,5 +1,5 @@
-﻿using Application.DTOs.Instructor;
-using Application.Result;
+using Application.DTOs.Instructor;
+using Application.Bases;
 using Application.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

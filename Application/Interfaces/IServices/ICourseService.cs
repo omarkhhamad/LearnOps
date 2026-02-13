@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Application.DTOs.Course;
 using Application.DTOs.Student;
-using Application.Result;
+using Application.Bases;
 
 namespace Application.Interfaces.IServices
 {

@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Exam;
+using Application.DTOs.Exam;
 using Application.Interfaces.IServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

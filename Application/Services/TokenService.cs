@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -11,19 +11,26 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Services
 {
-    public class JwtService : IJwtService
+    /// <summary>
+    /// Service for JWT token generation and validation
+    /// Implements token creation for access tokens and refresh tokens
+    /// </summary>
+    public class TokenService : ITokenService
     {
         private readonly JwtSettings _jwtSettings;
 
-        public JwtService(IOptions<JwtSettings> options)
+        public TokenService(IOptions<JwtSettings> options)
         {
             _jwtSettings = options.Value;
         }
 
+        /// <summary>
+        /// Generates a JWT access token with user claims and roles
+        /// </summary>
         public string GenerateAccessToken(ApplicationUser user, IList<string> roles)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new List<Claim>
             {
@@ -33,30 +40,41 @@ namespace Infrastructure.Services
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
+            // Add role claims
             foreach (var role in roles)
+            {
                 claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var token = new JwtSecurityToken(
                 issuer: _jwtSettings.Issuer,
                 audience: _jwtSettings.Audience,
                 claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
-                signingCredentials: creds
+                signingCredentials: credentials
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        /// <summary>
+        /// Generates a secure refresh token
+        /// </summary>
         public RefreshToken GenerateRefreshToken(Guid userId)
         {
             return new RefreshToken
             {
                 UserId = userId,
                 Token = Convert.ToBase64String(Guid.NewGuid().ToByteArray()),
-                Expiration = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays)
+                Expiration = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
+                CreatedAt = DateTime.UtcNow
             };
         }
 
+        /// <summary>
+        /// Validates an expired token and extracts the claims principal
+        /// Used during token refresh to verify user identity
+        /// </summary>
         public ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
         {
             var tokenValidationParameters = new TokenValidationParameters
@@ -65,15 +83,29 @@ namespace Infrastructure.Services
                 ValidateIssuer = true,
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret)),
-                ValidateLifetime = false, // ignore expiration
+                ValidateLifetime = false, // Ignore expiration for refresh flow
                 ValidIssuer = _jwtSettings.Issuer,
                 ValidAudience = _jwtSettings.Audience
             };
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
-            if (securityToken is not JwtSecurityToken) return null;
-            return principal;
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
+
+                // Verify it's a valid JWT token
+                if (securityToken is not JwtSecurityToken jwtSecurityToken ||
+                    !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return null;
+                }
+
+                return principal;
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

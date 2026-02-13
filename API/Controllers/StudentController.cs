@@ -1,6 +1,6 @@
-﻿using Application.DTOs.Student;
+using Application.DTOs.Student;
 using Application.Interfaces.IServices;
-using Application.Result;
+using Application.Bases;
 using Application.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
