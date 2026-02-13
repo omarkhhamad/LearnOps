@@ -32,13 +32,17 @@ namespace Application.Mappings
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User.FullName))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email))
                 .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.User.PhoneNumber))
-                .ForMember(dest => dest.Courses, opt => opt.MapFrom(src => src.Enrollments));
+                .ForMember(dest => dest.TotalCourses, opt => opt.MapFrom(src => src.Enrollments.Count))
+                .ForMember(dest => dest.ActiveCourses, opt => opt.MapFrom(src => src.Enrollments.Count(e => e.Status == "Active")))
+                .ForMember(dest => dest.Enrollments, opt => opt.MapFrom(src => src.Enrollments));
 
-            CreateMap<Enrollment, StudentCourseGroupDto>()
+            CreateMap<Enrollment, StudentCourseDetailsDto>()
                 .ForMember(dest => dest.CourseId, opt => opt.MapFrom(src => src.ClassGroup.Course.CourseId))
                 .ForMember(dest => dest.CourseName, opt => opt.MapFrom(src => src.ClassGroup.Course.Title))
                 .ForMember(dest => dest.GroupId, opt => opt.MapFrom(src => src.ClassGroup.GroupId))
-                .ForMember(dest => dest.GroupName, opt => opt.MapFrom(src => src.ClassGroup.Name));
+                .ForMember(dest => dest.GroupName, opt => opt.MapFrom(src => src.ClassGroup.Name))
+                .ForMember(dest => dest.EnrollmentDate, opt => opt.MapFrom(src => src.EnrollmentDate))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
 
             // ============ Instructor ============
             CreateMap<Instructor, InstructorDto>()
@@ -71,14 +75,14 @@ namespace Application.Mappings
                            }).ToList()
                        }).ToList()))
                 .ForMember(dest => dest.TotalStudents, opt => opt.MapFrom(src => src.ClassGroups.Sum(g => g.Enrollments.Count)))
-                .ForMember(dest => dest.ActiveGroups, opt => opt.MapFrom(src => src.ClassGroups.Count(g => g.EndDate == null || g.EndDate > System.DateTime.Now)));
+                .ForMember(dest => dest.ActiveGroups, opt => opt.MapFrom(src => src.ClassGroups.Count(g => g.EndDate > System.DateTime.Now)));
 
             // ============ Course ============
             CreateMap<Course, CourseDto>();
             CreateMap<Course, CourseDetailedDto>()
                 .ForMember(dest => dest.Groups, opt => opt.MapFrom(src => src.ClassGroups))
                 .ForMember(dest => dest.TotalEnrolledStudents, opt => opt.MapFrom(src => src.ClassGroups.Sum(g => g.Enrollments.Count)))
-                .ForMember(dest => dest.ActiveGroups, opt => opt.MapFrom(src => src.ClassGroups.Count(g => g.EndDate == null || g.EndDate > System.DateTime.Now)));
+                .ForMember(dest => dest.ActiveGroups, opt => opt.MapFrom(src => src.ClassGroups.Count(g => g.EndDate > System.DateTime.Now)));
 
             CreateMap<Course, CourseWithGroupsDto>()
                 .ForMember(dest => dest.CourseName, opt => opt.MapFrom(src => src.Title))

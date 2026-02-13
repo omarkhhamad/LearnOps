@@ -15,7 +15,7 @@ namespace Domain.Models
     }
     public class ApplicationUser : IdentityUser<Guid>, ISoftDeletable
     {
-        public string FullName { get; set; }
+        public string FullName { get; set; } = string.Empty;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsDeleted { get; set; } = false;

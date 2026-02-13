@@ -1,6 +1,5 @@
--- ============================================================================
--- LEARN OPS SEED DATA - FULL COMPREHENSIVE VERSION (AT LEAST 20 ROWS PER TABLE)
--- ============================================================================
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
 SET NOCOUNT ON;
 
 -- 0. CLEANUP EXISTING DATA (To prevent duplicate errors)
@@ -75,13 +74,14 @@ BEGIN
     INSERT INTO AspNetUsers (Id, UserName, NormalizedUserName, Email, NormalizedEmail, EmailConfirmed, PasswordHash, SecurityStamp, ConcurrencyStamp, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount, FullName, CreatedAt, PhoneNumber)
     VALUES (@U_Id, @S_Email, UPPER(@S_Email), @S_Email, UPPER(@S_Email), 1, @DefaultPasswordHash, NEWID(), NEWID(), 0, 0, 1, 0, @S_Name, GETDATE(), @S_Phone);
     INSERT INTO AspNetUserRoles (UserId, RoleId) VALUES (@U_Id, @StudentRoleId);
-    INSERT INTO Students (UserId, FullName, Phone, Email, DateOfBirth, CreatedAt, IsDeleted)
-    VALUES (@U_Id, @S_Name, @S_Phone, @S_Email, @S_DOB, GETDATE(), 0);
+    INSERT INTO Students (UserId, DateOfBirth, CreatedAt, IsDeleted)
+    VALUES (@U_Id, @S_DOB, GETDATE(), 0);
     FETCH NEXT FROM Student_Cursor INTO @S_Name, @S_Email, @S_Phone, @S_DOB;
 END
 CLOSE Student_Cursor; DEALLOCATE Student_Cursor;
 
 -- 3. SEED INSTRUCTORS (Profiles + Users) - 20 ROWS
+
 -- ----------------------------------------------------------------------------
 DECLARE @InstData TABLE (Name NVARCHAR(100), Email NVARCHAR(100), Phone NVARCHAR(20), Rate DECIMAL(18,2));
 INSERT INTO @InstData VALUES 
@@ -115,8 +115,8 @@ BEGIN
     INSERT INTO AspNetUsers (Id, UserName, NormalizedUserName, Email, NormalizedEmail, EmailConfirmed, PasswordHash, SecurityStamp, ConcurrencyStamp, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount, FullName, CreatedAt, PhoneNumber)
     VALUES (@U_Id, @I_Email, UPPER(@I_Email), @I_Email, UPPER(@I_Email), 1, @DefaultPasswordHash, NEWID(), NEWID(), 0, 0, 1, 0, @I_Name, GETDATE(), @I_Phone);
     INSERT INTO AspNetUserRoles (UserId, RoleId) VALUES (@U_Id, @InstructorRoleId);
-    INSERT INTO Instructors (UserId, FullName, Phone, Email, HourlyRate, IsDeleted)
-    VALUES (@U_Id, @I_Name, @I_Phone, @I_Email, @I_Rate, 0);
+    INSERT INTO Instructors (UserId, HourlyRate, CreatedAt, IsDeleted)
+    VALUES (@U_Id, @I_Rate, GETDATE(), 0);
     FETCH NEXT FROM Inst_Cursor INTO @I_Name, @I_Email, @I_Phone, @I_Rate;
 END
 CLOSE Inst_Cursor; DEALLOCATE Inst_Cursor;

@@ -1,20 +1,32 @@
-public class StudentDetailedDto
+using System;
+using System.Collections.Generic;
+
+namespace Application.DTOs.Student
 {
-    public int StudentId { get; set; }
-    public string FullName { get; set; }
-    public string Phone { get; set; }
-    public string Email { get; set; }
-    public DateTime? DateOfBirth { get; set; }
+    public class StudentDetailedDto
+    {
+        public int StudentId { get; set; }
+        public string FullName { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public DateTime? DateOfBirth { get; set; }
+        public int Age => DateOfBirth.HasValue ? DateTime.Now.Year - DateOfBirth.Value.Year : 0;
 
-    // Enrollments with full details
-    public List<StudentCourseGroupDto> Courses { get; set; } = new();
+        // Statistics
+        public int TotalCourses { get; set; }
+        public int ActiveCourses { get; set; }
+
+        // Detailed Enrollments
+        public List<StudentCourseDetailsDto> Enrollments { get; set; } = new();
+    }
+
+    public class StudentCourseDetailsDto
+    {
+        public int CourseId { get; set; }
+        public string CourseName { get; set; } = null!;
+        public int GroupId { get; set; }
+        public string GroupName { get; set; } = null!;
+        public DateTime EnrollmentDate { get; set; }
+        public string Status { get; set; } = null!;
+    }
 }
-
-public class StudentCourseGroupDto
-{
-    public int CourseId { get; set; }
-    public string CourseName { get; set; } = null!;
-    public int GroupId { get; set; }
-    public string GroupName { get; set; } = null!;
-}
-

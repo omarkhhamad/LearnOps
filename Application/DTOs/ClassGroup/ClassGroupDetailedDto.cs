@@ -19,9 +19,9 @@ namespace Application.DTOs.ClassGroup
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public string Status => (EndDate == null || EndDate > DateTime.Now) ? "Active" : "Inactive";
-        public CourseDto Course { get; set; }
-        public InstructorDto Instructor { get; set; }
-        public List<StudentDto> Students { get; set; }
+        public CourseDto Course { get; set; } = null!;
+        public InstructorDto Instructor { get; set; } = null!;
+        public List<StudentDto> Students { get; set; } = new();
         public int StudentsCount => Students?.Count ?? 0;
 
     }

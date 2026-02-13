@@ -13,7 +13,7 @@ namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260130035054_auth")]
-    partial class auth
+    partial class Auth
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

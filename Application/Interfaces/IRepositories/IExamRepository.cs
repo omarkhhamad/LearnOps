@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace Application.Interfaces.IRepositories
 {
-    public interface IExamRepository : IBaseRepository <Exam, int>
+    public interface IExamRepository : IBaseRepository<Exam, int>
     {
         Task<IEnumerable<Exam>> GetAllExamsAsync();
         Task<IEnumerable<Exam>> GetExamsByGroupIdAsync(int groupId);
         Task<IEnumerable<Exam>> GetExamsByCourseIdAsync(int courseId);
         Task<Exam?> GetExamWithResultsAsync(int examId);
-        Task<bool> ExistInGroupAsync(int GroupId , string CourseName);
-        Task<Exam> GetExamByIdAsync(int Id);
-        Task<bool> DeleteRange(IEnumerable<Exam> entities);
+        Task<bool> ExistInGroupAsync(int GroupId, string CourseName);
+        Task<Exam?> GetExamByIdAsync(int Id);
+        new Task<bool> DeleteRange(IEnumerable<Exam> entities);
     }
 }

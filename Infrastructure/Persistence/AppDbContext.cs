@@ -22,7 +22,6 @@ namespace Infrastructure.Persistence
         public DbSet<ExamResult> ExamResults { get; set; } = null!;
         public DbSet<Certificate> Certificates { get; set; } = null!;
         public DbSet<Payment> Payments { get; set; } = null!;
-        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -56,10 +55,13 @@ namespace Infrastructure.Persistence
             // ===============================
 
             // RefreshToken
-            modelBuilder.Entity<RefreshToken>()
-           .HasOne(rt => rt.User)
-           .WithMany(u => u.RefreshTokens)
-           .HasForeignKey(rt => rt.UserId);
+            // RefreshToken (Owned Type)
+            modelBuilder.Entity<ApplicationUser>()
+                .OwnsMany(u => u.RefreshTokens, t =>
+                {
+                    t.WithOwner(rt => rt.User).HasForeignKey(rt => rt.UserId);
+                    t.HasKey(rt => rt.Id);
+                });
 
             // Enrollment -> ClassGroup (many-to-one)
             modelBuilder.Entity<Enrollment>()

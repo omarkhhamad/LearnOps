@@ -17,7 +17,7 @@ namespace Application.DTOs.Course
 
         /// <summary>Course description</summary>
         /// <example>This course covers the basics of .NET and C#</example>
-        public string Description { get; set; } = null!;
+        public string? Description { get; set; }
 
         /// <summary>Course duration in weeks</summary>
         /// <example>8</example>

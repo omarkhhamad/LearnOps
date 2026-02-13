@@ -47,7 +47,9 @@ namespace Infrastructure.Services
                 var accessToken = _jwtService.GenerateAccessToken(user, roles);
                 var refreshToken = _jwtService.GenerateRefreshToken(user.Id);
 
-                await _unitOfWork.RefreshTokens.AddAsync(refreshToken);
+                // Add to User's collection (Since it's an Owned Type)
+                user.RefreshTokens.Add(refreshToken);
+                // await _unitOfWork.RefreshTokens.AddAsync(refreshToken); // Removed: Cannot add owned type directly
                 await _unitOfWork.CommitAsync();
 
                 return Result<AuthResponse>.Success(new AuthResponse
@@ -78,7 +80,7 @@ namespace Infrastructure.Services
                 if (user == null) return Result<AuthResponse>.Fail("User not found", 404);
 
                 var existingToken = await _unitOfWork.RefreshTokens.GetByTokenAsync(request.RefreshToken);
-                if (existingToken == null || existingToken.IsRevoked || existingToken.Expiration < DateTime.UtcNow)
+                if (existingToken == null || !existingToken.IsActive)
                     return Result<AuthResponse>.Fail("Invalid or expired refresh token", 400);
 
                 existingToken.IsRevoked = true;
@@ -87,7 +89,9 @@ namespace Infrastructure.Services
                 var accessToken = _jwtService.GenerateAccessToken(user, roles);
                 var newRefreshToken = _jwtService.GenerateRefreshToken(user.Id);
 
-                await _unitOfWork.RefreshTokens.AddAsync(newRefreshToken);
+                // Add to User's collection
+                user.RefreshTokens.Add(newRefreshToken);
+                // await _unitOfWork.RefreshTokens.AddAsync(newRefreshToken); // Removed
                 await _unitOfWork.CommitAsync();
 
                 return Result<AuthResponse>.Success(new AuthResponse
@@ -144,7 +148,9 @@ namespace Infrastructure.Services
                 var accessToken = _jwtService.GenerateAccessToken(user, registeredRoles);
                 var refreshToken = _jwtService.GenerateRefreshToken(user.Id);
 
-                await _unitOfWork.RefreshTokens.AddAsync(refreshToken);
+                // Add to User's collection
+                user.RefreshTokens.Add(refreshToken);
+                // await _unitOfWork.RefreshTokens.AddAsync(refreshToken); // Removed
                 await _unitOfWork.CommitAsync();
 
                 return Result<AuthResponse>.Success(new AuthResponse

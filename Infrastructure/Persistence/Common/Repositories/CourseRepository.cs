@@ -23,7 +23,7 @@ namespace Infrastructure.Persistence.Common.Repositories
              .ToListAsync();
         }
 
-        public Task<Course> GetCourseWithClassGroupsAsync(int courseId)
+        public Task<Course?> GetCourseWithClassGroupsAsync(int courseId)
         {
             return _context.Courses
                 .Where(c => c.CourseId == courseId)

@@ -102,10 +102,10 @@ namespace Application.Services
 
         public async Task<Result<CourseDto>> UpdateCourse(int id, AddUpdateCourseDto courseDto)
         {
-              var course = await _unitOfWork.Courses.GetByIdAsync(id);
+            var course = await _unitOfWork.Courses.GetByIdAsync(id);
             if (course == null)
-                 return Result<CourseDto>.Fail("Course not found", 404);
-            course.Title = courseDto.Title; 
+                return Result<CourseDto>.Fail("Course not found", 404);
+            course.Title = courseDto.Title;
             course.Description = courseDto.Description;
             course.DurationWeeks = courseDto.DurationWeeks;
             course.Price = courseDto.Price;
@@ -128,7 +128,7 @@ namespace Application.Services
         public async Task<Result<CourseDetailedDto>> GetCourseDetailedById(int id)
         {
             var course = await _unitOfWork.Courses.GetByIdAsync(id);
-            if (course == null) 
+            if (course == null)
                 return Result<CourseDetailedDto>.Fail("Course not found", 404);
 
             var groups = await _unitOfWork.ClassGroups.GetGroupsByCourseIdWithDetails(id);
@@ -136,7 +136,7 @@ namespace Application.Services
             var dto = _mapper.Map<CourseDetailedDto>(course);
             dto.Groups = _mapper.Map<List<ClassGroupWithInstructorDto>>(groups);
             dto.TotalEnrolledStudents = groups.Sum(g => g.Enrollments?.Count ?? 0);
-            dto.ActiveGroups = groups.Count(g => g.EndDate == null || g.EndDate > DateTime.Now);
+            dto.ActiveGroups = groups.Count(g => g.EndDate > DateTime.Now);
 
             return Result<CourseDetailedDto>.Success(dto);
         }

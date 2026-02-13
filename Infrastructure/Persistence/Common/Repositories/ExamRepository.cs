@@ -21,7 +21,7 @@ namespace Infrastructure.Persistence.Common.Repositories
                        .ThenInclude(g => g.Instructor)
                             .ThenInclude(i => i.User)
                    .Include(e => e.ExamResults)
-                       .ThenInclude(er => er.Student)
+                       .ThenInclude(er => er.Student!)
                             .ThenInclude(s => s.User);
         }
 
@@ -69,7 +69,7 @@ namespace Infrastructure.Persistence.Common.Repositories
                     e.Title.ToLower().Trim() == examTitle.ToLower().Trim());
         }
 
-        public Task<bool> DeleteRange(IEnumerable<Exam> entities)
+        public new Task<bool> DeleteRange(IEnumerable<Exam> entities)
         {
             try
             {
