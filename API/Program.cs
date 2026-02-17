@@ -46,25 +46,6 @@ namespace API
                 .Get<GoogleAuthConfig>()!;
 
 
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtSettings.Issuer,
-                    ValidAudience = jwtSettings.Audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(secretKey),
-                    ClockSkew = TimeSpan.Zero // Token expires exactly at expiration time
-                };
-            });
 
             // ============================
             // AUTHORIZATION POLICIES
@@ -125,6 +106,27 @@ namespace API
              .AddEntityFrameworkStores<AppDbContext>()
              .AddDefaultTokenProviders();
 
+            // Overriding Default Authentication Scheme to JWT (After Identity)
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidAudience = jwtSettings.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(secretKey),
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+
 
             // ============================
             // CUSTOM APPLICATION SERVICES
@@ -138,7 +140,7 @@ namespace API
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                    policy.WithOrigins("https://localhost:3000")
+                    policy.WithOrigins("https://localhost:3000", "http://localhost:5173")
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                 });
@@ -163,6 +165,7 @@ namespace API
             // MIDDLEWARE PIPELINE
             // ============================
             app.UseHttpsRedirection();      // Redirect HTTP to HTTPS
+            app.UseStaticFiles();           // Enable serving static files (for uploads)
             app.UseCors("AllowFrontend");    // Enable CORS
             app.UseAuthentication();        // Enable Authentication
             app.UseAuthorization();         // Enable Authorization

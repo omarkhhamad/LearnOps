@@ -5,6 +5,7 @@ namespace Domain.Models
     {
         public int StudentId { get; set; }
         public DateTime DateOfBirth { get; set; }
+        public string? Major { get; set; }
 
         // Navigation Properties
         public Guid UserId { get; set; }

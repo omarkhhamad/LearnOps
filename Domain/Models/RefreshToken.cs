@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Models
 {
-    [Owned]
     public class RefreshToken
     {
         public Guid Id { get; set; } = Guid.NewGuid();

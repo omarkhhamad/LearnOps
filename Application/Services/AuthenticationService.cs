@@ -15,6 +15,8 @@ using Google.Apis.Auth;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http;
+using System.Net.Http.Json;
 
 namespace Infrastructure.Services
 {
@@ -29,6 +31,7 @@ namespace Infrastructure.Services
         private readonly GoogleAuthConfig _googleConfig;
         private readonly JwtSettings _jwtSettings;
         private readonly IUserService _userService;
+        private readonly IHttpClientFactory _httpClientFactory;
 
         public AuthenticationService(
             UserManager<ApplicationUser> userManager,
@@ -36,7 +39,8 @@ namespace Infrastructure.Services
             IUnitOfWork unitOfWork,
             IOptions<JwtSettings> jwtOptions,
             IOptions<GoogleAuthConfig> googleOptions,
-            IUserService userService)
+            IUserService userService,
+            IHttpClientFactory httpClientFactory)
         {
             _userManager = userManager;
             _tokenService = tokenService;
@@ -44,6 +48,7 @@ namespace Infrastructure.Services
             _jwtSettings = jwtOptions.Value;
             _googleConfig = googleOptions.Value;
             _userService = userService;
+            _httpClientFactory = httpClientFactory;
         }
 
         /// <summary>
@@ -53,7 +58,7 @@ namespace Infrastructure.Services
         {
             try
             {
-                var user = await _userManager.FindByEmailAsync(request.Email);
+                var user = await _unitOfWork.Users.GetByEmailAsync(request.Email);
                 if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
                 {
                     return Result<AuthenticationResponse>.Fail("Invalid email or password", 401);
@@ -126,7 +131,7 @@ namespace Infrastructure.Services
                 }
 
                 var userId = Guid.Parse(userIdClaim.Value);
-                var user = await _userManager.FindByIdAsync(userId.ToString());
+                var user = await _unitOfWork.Users.GetByIdWithRefreshTokensAsync(userId);
 
                 if (user == null)
                 {
@@ -153,7 +158,7 @@ namespace Infrastructure.Services
         {
             try
             {
-                var user = await _userManager.FindByIdAsync(userId.ToString());
+                var user = await _unitOfWork.Users.GetByIdWithRefreshTokensAsync(userId);
                 if (user == null)
                 {
                     return Result.Fail("User not found", 404);
@@ -178,12 +183,49 @@ namespace Infrastructure.Services
         {
             try
             {
-                var settings = new GoogleJsonWebSignature.ValidationSettings
-                {
-                    Audience = new List<string> { _googleConfig.ClientId }
-                };
+                GoogleJsonWebSignature.Payload payload = null;
 
-                var payload = await GoogleJsonWebSignature.ValidateAsync(request.IdToken, settings);
+                try
+                {
+                    var settings = new GoogleJsonWebSignature.ValidationSettings
+                    {
+                        Audience = new List<string> { _googleConfig.ClientId }
+                    };
+
+                    payload = await GoogleJsonWebSignature.ValidateAsync(request.IdToken, settings);
+                }
+                catch (InvalidJwtException)
+                {
+                    // Fallback: Try validating as Access Token
+                    try
+                    {
+                        var client = _httpClientFactory.CreateClient();
+                        var requestMessage = new HttpRequestMessage(HttpMethod.Get, "https://www.googleapis.com/oauth2/v3/userinfo");
+                        requestMessage.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", request.IdToken);
+
+                        var userInfoResponse = await client.SendAsync(requestMessage);
+
+                        if (userInfoResponse.IsSuccessStatusCode)
+                        {
+                            var googleUser = await userInfoResponse.Content.ReadFromJsonAsync<GoogleUserInfo>();
+
+                            if (googleUser != null)
+                            {
+                                payload = new GoogleJsonWebSignature.Payload
+                                {
+                                    Email = googleUser.email,
+                                    Name = googleUser.name,
+                                    Picture = googleUser.picture,
+                                    EmailVerified = googleUser.email_verified
+                                };
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore access token validation errors and let it fall through to "Invalid Google token"
+                    }
+                }
 
                 if (payload == null)
                 {
@@ -195,7 +237,7 @@ namespace Infrastructure.Services
                     return Result<AuthenticationResponse>.Fail("Google email is not verified", 400);
                 }
 
-                var user = await _userManager.FindByEmailAsync(payload.Email);
+                var user = await _unitOfWork.Users.GetByEmailAsync(payload.Email);
 
                 if (user == null)
                 {
@@ -204,6 +246,7 @@ namespace Infrastructure.Services
                         Email = payload.Email,
                         UserName = payload.Email,
                         FullName = payload.Name ?? payload.Email,
+                        ProfilePictureUrl = payload.Picture,
                         CreatedAt = DateTime.UtcNow
                     };
 
@@ -215,12 +258,13 @@ namespace Infrastructure.Services
                         return Result<AuthenticationResponse>.Fail(createResult.Message, createResult.StatusCode ?? 400);
                     }
                 }
+                else if (string.IsNullOrEmpty(user.ProfilePictureUrl) && !string.IsNullOrEmpty(payload.Picture))
+                {
+                    user.ProfilePictureUrl = payload.Picture;
+                    await _userManager.UpdateAsync(user);
+                }
 
                 return await GenerateAuthResponseAsync(user);
-            }
-            catch (InvalidJwtException ex)
-            {
-                return Result<AuthenticationResponse>.Fail($"Invalid Google token: {ex.Message}", 400);
             }
             catch (Exception ex)
             {
@@ -240,8 +284,14 @@ namespace Infrastructure.Services
             var refreshToken = _tokenService.GenerateRefreshToken(user.Id);
             refreshToken.Token = jti ?? Guid.NewGuid().ToString();
 
-            user.RefreshTokens.Add(refreshToken);
+            // Update last login time
+            user.LastLoginAt = DateTime.UtcNow;
             await _userManager.UpdateAsync(user);
+
+
+            // Directly add the refresh token to the repository to ensure it's treated as a new INSERT
+            // and doesn't trigger concurrency checks on the ApplicationUser
+            await _unitOfWork.RefreshTokens.AddAsync(refreshToken);
             await _unitOfWork.CommitAsync();
 
             return Result<AuthenticationResponse>.Success(new AuthenticationResponse
@@ -250,5 +300,17 @@ namespace Infrastructure.Services
                 AccessTokenExpiration = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes)
             }, successStatusCode);
         }
+    }
+
+    public class GoogleUserInfo
+    {
+        public string sub { get; set; }
+        public string name { get; set; }
+        public string given_name { get; set; }
+        public string family_name { get; set; }
+        public string picture { get; set; }
+        public string email { get; set; }
+        public bool email_verified { get; set; }
+        public string locale { get; set; }
     }
 }

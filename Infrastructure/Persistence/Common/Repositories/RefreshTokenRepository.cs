@@ -18,38 +18,23 @@ namespace Infrastructure.Persistence.Common.Repositories
 
         public async Task<RefreshToken?> GetByTokenAsync(string token)
         {
-            // Since RefreshToken is [Owned], it doesn't have its own DbSet.
-            // We must query via the aggregate root (ApplicationUser).
-            return await _context.Users
-                .SelectMany(u => u.RefreshTokens)
+            return await _context.RefreshTokens
                 .Include(rt => rt.User)
                 .FirstOrDefaultAsync(rt => rt.Token == token);
         }
 
         public async Task<List<RefreshToken>> GetActiveByUserIdAsync(Guid userId)
         {
-            var user = await _context.Users
-                .Include(u => u.RefreshTokens)
-                .FirstOrDefaultAsync(u => u.Id == userId);
-
-            if (user == null) return new List<RefreshToken>();
-
-            return user.RefreshTokens
-                .Where(rt => rt.IsActive)
-                .ToList();
+            return await _context.RefreshTokens
+                .Where(rt => rt.UserId == userId && rt.IsActive)
+                .ToListAsync();
         }
 
         public async Task RevokeAsync(RefreshToken token)
         {
             token.IsRevoked = true;
-            // When using Owned Types, just modifying the entity is enough if the tracker is aware.
-            // However, to be safe with BaseRepository patterns:
-            // _context.Entry(token).State = EntityState.Modified; // This might fail for owned types depending on EF version/tracking
-
-            // Best practice for owned: Save via the owner. 
-            // Assuming the token is already attached (which it should be if loaded via GetByTokenAsync)
-            // nothing special needed other than SaveChanges which calls Commit.
-            await Task.CompletedTask;
+            _context.RefreshTokens.Update(token);
+            await _context.SaveChangesAsync();
         }
     }
 }

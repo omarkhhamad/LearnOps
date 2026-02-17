@@ -27,6 +27,13 @@ namespace Infrastructure.Persistence.Common.Repositories
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
 
+        public async Task<ApplicationUser?> GetByIdWithRefreshTokensAsync(Guid id)
+        {
+            return await _context.Users
+                .Include(u => u.RefreshTokens)
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }
+
         public async Task<bool> UsernameExistsAsync(string username)
         {
             return await _context.Users.AnyAsync(u => u.UserName == username);

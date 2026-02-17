@@ -4,6 +4,8 @@ namespace Domain.Models
     {
         public int InstructorId { get; set; }
         public decimal HourlyRate { get; set; }
+        public string? Specialization { get; set; }
+        public string? Degree { get; set; }
 
         // Navigation Properties
         public Guid UserId { get; set; }
