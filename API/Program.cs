@@ -30,9 +30,20 @@ namespace API
              .GetSection(JwtSettings.SectionName)
              .Get<JwtSettings>()!;
 
-            //var jwtSettings = builder.Co  nfiguration.GetSection("JwtSettings");
+            //var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 
             var secretKey = Encoding.UTF8.GetBytes(jwtSettings.Secret);
+
+            // ============================
+            // GOOGLE AUTHENTICATION
+            // ============================
+            builder.Services.Configure<GoogleAuthConfig>(
+                builder.Configuration.GetSection(GoogleAuthConfig.SectionName)
+            );
+
+            var googleConfig = builder.Configuration
+                .GetSection(GoogleAuthConfig.SectionName)
+                .Get<GoogleAuthConfig>()!;
 
 
             builder.Services.AddAuthentication(options =>

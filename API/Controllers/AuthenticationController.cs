@@ -1,9 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication;
 using Application.DTOs.Authentication.Requests;
 using Application.DTOs.Authentication.Responses;
 using Application.Interfaces.IServices;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
+using Application.Options;
+using Application.Bases;
+using IAuthenticationService = Application.Interfaces.IServices.IAuthenticationService;
 
 namespace API.Controllers
 {
@@ -16,138 +21,58 @@ namespace API.Controllers
     public class AuthenticationController : BaseController
     {
         private readonly IAuthenticationService _authenticationService;
+        private readonly GoogleAuthConfig _googleConfig;
 
-        public AuthenticationController(IAuthenticationService authenticationService)
+        public AuthenticationController(
+            IAuthenticationService authenticationService,
+            IOptions<GoogleAuthConfig> googleConfig)
         {
             _authenticationService = authenticationService;
+            _googleConfig = googleConfig.Value;
         }
 
-        /// <summary>
-        /// Register a new user account
-        /// </summary>
-        /// <param name="request">Registration details</param>
-        /// <returns>Authentication response with access token</returns>
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             var result = await _authenticationService.RegisterAsync(request);
-
-            if (result.IsSuccess && result.Data != null)
-            {
-                // Store refresh token in HttpOnly cookie (secure)
-                SetRefreshTokenCookie(result.Data.RefreshToken);
-
-                // Return only the public response (without refresh token)
-                var publicResponse = new AuthenticationResponse
-                {
-                    AccessToken = result.Data.AccessToken,
-                    AccessTokenExpiration = result.Data.AccessTokenExpiration
-                };
-
-                return ToActionResult(Application.Bases.Result<AuthenticationResponse>.Success(publicResponse, result.StatusCode));
-            }
-
-            return ToActionResult(Application.Bases.Result<AuthenticationResponse>.Fail(result.Message, result.StatusCode));
+            return ToActionResult(result);
         }
 
-        /// <summary>
-        /// Login with email and password
-        /// </summary>
-        /// <param name="request">Login credentials</param>
-        /// <returns>Authentication response with access token</returns>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var result = await _authenticationService.LoginAsync(request);
-
-            if (result.IsSuccess && result.Data != null)
-            {
-                // Store refresh token in HttpOnly cookie (secure)
-                SetRefreshTokenCookie(result.Data.RefreshToken);
-
-                // Return only the public response (without refresh token)
-                var publicResponse = new AuthenticationResponse
-                {
-                    AccessToken = result.Data.AccessToken,
-                    AccessTokenExpiration = result.Data.AccessTokenExpiration
-                };
-
-                return ToActionResult(Application.Bases.Result<AuthenticationResponse>.Success(publicResponse, result.StatusCode));
-            }
-
-            return ToActionResult(Application.Bases.Result<AuthenticationResponse>.Fail(result.Message, result.StatusCode));
-        }
-
-        /// <summary>
-        /// Refresh access token using refresh token from cookie
-        /// </summary>
-        /// <param name="request">Request containing expired access token</param>
-        /// <returns>New authentication response with fresh access token</returns>
-        [HttpPost("refresh")]
-        public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
-        {
-            // Get refresh token from HttpOnly cookie
-            var refreshToken = Request.Cookies["refreshToken"];
-
-            if (string.IsNullOrEmpty(refreshToken))
-            {
-                return ToActionResult(Application.Bases.Result<AuthenticationResponse>.Fail("Refresh token not found", 401));
-            }
-
-            var result = await _authenticationService.RefreshTokenAsync(request, refreshToken);
-
-            if (result.IsSuccess && result.Data != null)
-            {
-                // Store new refresh token in HttpOnly cookie
-                SetRefreshTokenCookie(result.Data.RefreshToken);
-
-                // Return only the public response (without refresh token)
-                var publicResponse = new AuthenticationResponse
-                {
-                    AccessToken = result.Data.AccessToken,
-                    AccessTokenExpiration = result.Data.AccessTokenExpiration
-                };
-
-                return ToActionResult(Application.Bases.Result<AuthenticationResponse>.Success(publicResponse, result.StatusCode));
-            }
-
-            return ToActionResult(Application.Bases.Result<AuthenticationResponse>.Fail(result.Message, result.StatusCode));
-        }
-
-        /// <summary>
-        /// Logout user by revoking all refresh tokens
-        /// </summary>
-        /// <param name="userId">User ID to logout</param>
-        /// <returns>Success or failure result</returns>
-        [HttpPost("logout/{userId:guid}")]
-        public async Task<IActionResult> Logout(Guid userId)
-        {
-            var result = await _authenticationService.LogoutAsync(userId);
-
-            if (result.IsSuccess)
-            {
-                // Clear refresh token cookie
-                Response.Cookies.Delete("refreshToken");
-            }
-
             return ToActionResult(result);
         }
 
-        /// <summary>
-        /// Sets refresh token in HttpOnly cookie for security
-        /// </summary>
-        /// <param name="refreshToken">Refresh token to store</param>
-        private void SetRefreshTokenCookie(string refreshToken)
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
         {
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,                    // Cannot be accessed by JavaScript (XSS protection)
-                Secure = true,                      // Only sent over HTTPS
-                SameSite = SameSiteMode.Strict,     // CSRF protection
-                Expires = DateTime.UtcNow.AddDays(7) // Match refresh token expiration
-            };
+            var result = await _authenticationService.RefreshTokenAsync(request);
+            return ToActionResult(result);
+        }
 
-            Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)
+                             ?? User.FindFirst("sub");
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            var result = await _authenticationService.LogoutAsync(Guid.Parse(userIdClaim.Value));
+            return ToActionResult(result);
+        }
+
+        [HttpPost("google")]
+        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest request)
+        {
+            var result = await _authenticationService.GoogleLoginAsync(request);
+            return ToActionResult(result);
         }
     }
 }
