@@ -57,9 +57,8 @@ namespace Infrastructure.Services
                 var roles = await _userManager.GetRolesAsync(user);
                 var accessToken = _tokenService.GenerateAccessToken(user, roles);
                 var refreshToken = _tokenService.GenerateRefreshToken(user.Id);
-
-                // Store refresh token (Owned Type - added to user's collection)
-                user.RefreshTokens.Add(refreshToken);
+                // Store refresh token as separate entity
+                await _unitOfWork.RefreshTokens.AddAsync(refreshToken);
                 await _unitOfWork.CommitAsync();
 
                 return Result<AuthenticationTokens>.Success(new AuthenticationTokens
@@ -111,8 +110,8 @@ namespace Infrastructure.Services
                 var accessToken = _tokenService.GenerateAccessToken(user, registeredRoles);
                 var refreshToken = _tokenService.GenerateRefreshToken(user.Id);
 
-                // Store refresh token (Owned Type - added to user's collection)
-                user.RefreshTokens.Add(refreshToken);
+                // Store refresh token as separate entity
+                await _unitOfWork.RefreshTokens.AddAsync(refreshToken);
                 await _unitOfWork.CommitAsync();
 
                 return Result<AuthenticationTokens>.Success(new AuthenticationTokens
@@ -168,14 +167,15 @@ namespace Infrastructure.Services
 
                 // Revoke old refresh token
                 existingToken.IsRevoked = true;
+                await _unitOfWork.CommitAsync();
 
                 // Generate new tokens
                 var roles = await _userManager.GetRolesAsync(user);
                 var newAccessToken = _tokenService.GenerateAccessToken(user, roles);
                 var newRefreshToken = _tokenService.GenerateRefreshToken(user.Id);
 
-                // Store new refresh token (Owned Type - added to user's collection)
-                user.RefreshTokens.Add(newRefreshToken);
+                // Store new refresh token as separate entity
+                await _unitOfWork.RefreshTokens.AddAsync(newRefreshToken);
                 await _unitOfWork.CommitAsync();
 
                 return Result<AuthenticationTokens>.Success(new AuthenticationTokens

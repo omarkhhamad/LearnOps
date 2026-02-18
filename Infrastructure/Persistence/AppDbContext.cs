@@ -13,6 +13,7 @@ namespace Infrastructure.Persistence
 
         // DbSets
         public DbSet<Student> Students { get; set; } = null!;
+        public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
         public DbSet<Instructor> Instructors { get; set; } = null!;
         public DbSet<Course> Courses { get; set; } = null!;
         public DbSet<ClassGroup> ClassGroups { get; set; } = null!;
@@ -54,14 +55,16 @@ namespace Infrastructure.Persistence
             // Relationships
             // ===============================
 
-            // RefreshToken
-            // RefreshToken (Owned Type)
-            modelBuilder.Entity<ApplicationUser>()
-                .OwnsMany(u => u.RefreshTokens, t =>
-                {
-                    t.WithOwner(rt => rt.User).HasForeignKey(rt => rt.UserId);
-                    t.HasKey(rt => rt.Id);
-                });
+            // RefreshToken as separate entity with FK to ApplicationUser
+            modelBuilder.Entity<RefreshToken>(t =>
+            {
+                t.HasKey(rt => rt.Id);
+                t.Property(rt => rt.Token).IsRequired();
+                t.HasOne(rt => rt.User)
+                    .WithMany(u => u.RefreshTokens)
+                    .HasForeignKey(rt => rt.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             // Enrollment -> ClassGroup (many-to-one)
             modelBuilder.Entity<Enrollment>()

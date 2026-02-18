@@ -85,21 +85,30 @@ namespace Infrastructure.Services
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret)),
                 ValidateLifetime = false, // Ignore expiration for refresh flow
                 ValidIssuer = _jwtSettings.Issuer,
-                ValidAudience = _jwtSettings.Audience
+                ValidAudience = _jwtSettings.Audience,
+                RequireSignedTokens = true,
+                // Restrict accepted signing algorithms to the expected one
+                ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256 }
             };
 
             try
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
+
+                // Ensure the token can be read as a JWT
+                if (!tokenHandler.CanReadToken(token)) return null;
+
                 var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
 
-                // Verify it's a valid JWT token
-                if (securityToken is not JwtSecurityToken jwtSecurityToken ||
-                    !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-                {
+                // Verify it's a valid JWT token and uses the expected algorithm
+                if (securityToken is not JwtSecurityToken jwtSecurityToken)
                     return null;
-                }
 
+                var alg = jwtSecurityToken.Header.Alg ?? string.Empty;
+                if (!alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.Ordinal))
+                    return null;
+
+                // If we reached here, signature and algorithm have been validated by the handler/parameters
                 return principal;
             }
             catch

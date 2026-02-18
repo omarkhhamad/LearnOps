@@ -4,6 +4,9 @@ using Application.DTOs.Authentication.Responses;
 using Application.Interfaces.IServices;
 using System;
 using System.Threading.Tasks;
+using Application.Options;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Http;
 
 namespace API.Controllers
 {
@@ -16,10 +19,12 @@ namespace API.Controllers
     public class AuthenticationController : BaseController
     {
         private readonly IAuthenticationService _authenticationService;
+        private readonly JwtSettings _jwtSettings;
 
-        public AuthenticationController(IAuthenticationService authenticationService)
+        public AuthenticationController(IAuthenticationService authenticationService, IOptions<JwtSettings> jwtOptions)
         {
             _authenticationService = authenticationService;
+            _jwtSettings = jwtOptions.Value;
         }
 
         /// <summary>
@@ -141,10 +146,10 @@ namespace API.Controllers
         {
             var cookieOptions = new CookieOptions
             {
-                HttpOnly = true,                    // Cannot be accessed by JavaScript (XSS protection)
-                Secure = true,                      // Only sent over HTTPS
-                SameSite = SameSiteMode.Strict,     // CSRF protection
-                Expires = DateTime.UtcNow.AddDays(7) // Match refresh token expiration
+                HttpOnly = true,                                // Cannot be accessed by JavaScript (XSS protection)
+                Secure = true,                                  // Only sent over HTTPS
+                SameSite = SameSiteMode.Strict,                 // CSRF protection
+                Expires = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays) // Match refresh token expiration from settings
             };
 
             Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
