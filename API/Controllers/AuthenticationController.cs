@@ -5,10 +5,9 @@ using Application.DTOs.Authentication.Responses;
 using Application.Interfaces.IServices;
 using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 using Application.Options;
-using Application.Bases;
-using IAuthenticationService = Application.Interfaces.IServices.IAuthenticationService;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Http;
 
 namespace API.Controllers
 {
@@ -21,14 +20,12 @@ namespace API.Controllers
     public class AuthenticationController : BaseController
     {
         private readonly IAuthenticationService _authenticationService;
-        private readonly GoogleAuthConfig _googleConfig;
+        private readonly JwtSettings _jwtSettings;
 
-        public AuthenticationController(
-            IAuthenticationService authenticationService,
-            IOptions<GoogleAuthConfig> googleConfig)
+        public AuthenticationController(IAuthenticationService authenticationService, IOptions<JwtSettings> jwtOptions)
         {
             _authenticationService = authenticationService;
-            _googleConfig = googleConfig.Value;
+            _jwtSettings = jwtOptions.Value;
         }
 
         [HttpPost("register")]
@@ -71,8 +68,15 @@ namespace API.Controllers
         [HttpPost("google")]
         public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest request)
         {
-            var result = await _authenticationService.GoogleLoginAsync(request);
-            return ToActionResult(result);
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,                                // Cannot be accessed by JavaScript (XSS protection)
+                Secure = true,                                  // Only sent over HTTPS
+                SameSite = SameSiteMode.Strict,                 // CSRF protection
+                Expires = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays) // Match refresh token expiration from settings
+            };
+
+            Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
         }
     }
 }

@@ -142,7 +142,8 @@ namespace API
                 {
                     policy.WithOrigins("https://localhost:3000", "http://localhost:5173")
                           .AllowAnyHeader()
-                          .AllowAnyMethod();
+                          .AllowAnyMethod()
+                          .AllowCredentials(); // Allow cookies (HttpOnly) to be sent from the frontend
                 });
             });
 

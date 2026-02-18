@@ -25,16 +25,33 @@ namespace Infrastructure.Persistence.Common.Repositories
 
         public async Task<List<RefreshToken>> GetActiveByUserIdAsync(Guid userId)
         {
+            // Avoid using the unmapped computed property `IsActive` inside the EF query
+            // because it cannot be translated to SQL. Capture current UTC time and
+            // evaluate the equivalent conditions directly so EF can translate them.
+            var now = DateTime.UtcNow;
             return await _context.RefreshTokens
-                .Where(rt => rt.UserId == userId && rt.IsActive)
+                .Where(rt => rt.UserId == userId && !rt.IsRevoked && rt.Expiration >= now)
                 .ToListAsync();
         }
 
         public async Task RevokeAsync(RefreshToken token)
         {
             token.IsRevoked = true;
-            _context.RefreshTokens.Update(token);
-            await _context.SaveChangesAsync();
+            // Mark modified so it will be updated on Commit
+            _context.Entry(token).State = EntityState.Modified;
+            await Task.CompletedTask;
+        }
+
+        public async Task AddAsync(RefreshToken token)
+        {
+            await _context.RefreshTokens.AddAsync(token);
+        }
+
+        public async Task<List<RefreshToken>> GetByUserIdAsync(Guid userId)
+        {
+            return await _context.RefreshTokens
+                .Where(rt => rt.UserId == userId)
+                .ToListAsync();
         }
     }
 }

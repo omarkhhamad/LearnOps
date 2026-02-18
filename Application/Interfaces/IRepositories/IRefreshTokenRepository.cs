@@ -12,6 +12,8 @@ namespace Application.Interfaces.IRepositories
         Task<RefreshToken?> GetByTokenAsync(string token);
         Task<List<RefreshToken>> GetActiveByUserIdAsync(Guid userId);
         Task RevokeAsync(RefreshToken token);
+        Task AddAsync(RefreshToken token);
+        Task<List<RefreshToken>> GetByUserIdAsync(Guid userId);
 
     }
 
