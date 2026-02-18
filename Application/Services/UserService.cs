@@ -29,6 +29,8 @@ namespace Infrastructure.Services
                 FullName = user.FullName,
                 Email = user.Email!,
                 PhoneNumber = user.PhoneNumber,
+                ProfilePictureUrl = user.ProfilePictureUrl,
+                Bio = user.Bio,
                 CreatedAt = user.CreatedAt,
                 Roles = roles.ToList()
             };
@@ -78,7 +80,6 @@ namespace Infrastructure.Services
                         await SyncProfilesAsync(user.Id, roles);
                     }
 
-                    await _unitOfWork.CommitAsync();
                     await _unitOfWork.CommitTransactionAsync();
                     return Result.Success(201, "User created successfully");
                 }
@@ -98,6 +99,8 @@ namespace Infrastructure.Services
             user.UserName = dto.UserName;
             user.Email = dto.Email;
             user.PhoneNumber = dto.PhoneNumber;
+            user.ProfilePictureUrl = dto.ProfilePictureUrl;
+            user.Bio = dto.Bio;
 
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)

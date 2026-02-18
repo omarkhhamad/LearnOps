@@ -15,28 +15,10 @@ namespace Application.Interfaces.IServices
         /// </summary>
         /// <param name="request">Login credentials</param>
         /// <returns>Result containing authentication tokens if successful</returns>
-        Task<Result<AuthenticationTokens>> LoginAsync(LoginRequest request);
-
-        /// <summary>
-        /// Registers a new user account
-        /// </summary>
-        /// <param name="request">Registration information</param>
-        /// <returns>Result containing authentication tokens if successful</returns>
-        Task<Result<AuthenticationTokens>> RegisterAsync(RegisterRequest request);
-
-        /// <summary>
-        /// Refreshes an expired access token using a valid refresh token
-        /// </summary>
-        /// <param name="request">Request containing the expired access token</param>
-        /// <param name="refreshToken">The refresh token from HttpOnly cookie</param>
-        /// <returns>Result containing new authentication tokens if successful</returns>
-        Task<Result<AuthenticationTokens>> RefreshTokenAsync(RefreshTokenRequest request, string refreshToken);
-
-        /// <summary>
-        /// Logs out a user by revoking all active refresh tokens
-        /// </summary>
-        /// <param name="userId">User ID to logout</param>
-        /// <returns>Result indicating success or failure</returns>
+        Task<Result<AuthenticationResponse>> LoginAsync(LoginRequest request);
+        Task<Result<AuthenticationResponse>> RegisterAsync(RegisterRequest request);
+        Task<Result<AuthenticationResponse>> RefreshTokenAsync(RefreshTokenRequest request);
         Task<Result> LogoutAsync(Guid userId);
+        Task<Result<AuthenticationResponse>> GoogleLoginAsync(GoogleLoginRequest request);
     }
 }

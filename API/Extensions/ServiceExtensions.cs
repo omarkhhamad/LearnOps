@@ -25,6 +25,9 @@ namespace API.Extensions
             services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IProfileService, ProfileService>();
+            services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IFileService, FileService>();
 
             // Repositories
             services.AddScoped<IStudentRepository, StudentRepository>();
@@ -35,8 +38,8 @@ namespace API.Extensions
             services.AddScoped<IExamRepository, ExamRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
-
-        }
-    }
+            services.AddHttpClient();
+		}
+	}
 
 }

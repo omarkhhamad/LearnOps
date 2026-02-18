@@ -11,6 +11,7 @@ namespace Application.Interfaces.IRepositories
     {
         Task<ApplicationUser?> GetByUsernameAsync(string username);
         Task<ApplicationUser?> GetByEmailAsync(string email);
+        Task<ApplicationUser?> GetByIdWithRefreshTokensAsync(Guid id);
         Task<bool> UsernameExistsAsync(string username);
         Task<bool> EmailExistsAsync(string email);
     }
