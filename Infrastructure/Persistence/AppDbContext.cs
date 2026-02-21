@@ -23,7 +23,7 @@ namespace Infrastructure.Persistence
         public DbSet<ExamResult> ExamResults { get; set; } = null!;
         public DbSet<Certificate> Certificates { get; set; } = null!;
         public DbSet<Payment> Payments { get; set; } = null!;
-        public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

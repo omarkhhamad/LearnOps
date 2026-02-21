@@ -64,20 +64,7 @@ namespace Infrastructure.Services
                     return Result<AuthenticationResponse>.Fail("Invalid email or password", 401);
                 }
 
-                // Generate tokens
-                var roles = await _userManager.GetRolesAsync(user);
-                var accessToken = _tokenService.GenerateAccessToken(user, roles);
-                var refreshToken = _tokenService.GenerateRefreshToken(user.Id);
-                // Store refresh token as separate entity
-                await _unitOfWork.RefreshTokens.AddAsync(refreshToken);
-                await _unitOfWork.CommitAsync();
-
-                return Result<AuthenticationTokens>.Success(new AuthenticationTokens
-                {
-                    AccessToken = accessToken,
-                    RefreshToken = refreshToken.Token,
-                    AccessTokenExpiration = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes)
-                });
+                return await GenerateAuthResponseAsync(user);
             }
             catch (Exception ex)
             {
@@ -116,21 +103,7 @@ namespace Infrastructure.Services
                     return Result<AuthenticationResponse>.Fail(createResult.Message, createResult.StatusCode ?? 400);
                 }
 
-                // Generate tokens
-                var registeredRoles = await _userManager.GetRolesAsync(user);
-                var accessToken = _tokenService.GenerateAccessToken(user, registeredRoles);
-                var refreshToken = _tokenService.GenerateRefreshToken(user.Id);
-
-                // Store refresh token as separate entity
-                await _unitOfWork.RefreshTokens.AddAsync(refreshToken);
-                await _unitOfWork.CommitAsync();
-
-                return Result<AuthenticationTokens>.Success(new AuthenticationTokens
-                {
-                    AccessToken = accessToken,
-                    RefreshToken = refreshToken.Token,
-                    AccessTokenExpiration = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes)
-                }, 201);
+                return await GenerateAuthResponseAsync(user, 201);
             }
             catch (Exception ex)
             {
@@ -175,21 +148,7 @@ namespace Infrastructure.Services
                 existingToken.IsRevoked = true;
                 await _unitOfWork.CommitAsync();
 
-                // Generate new tokens
-                var roles = await _userManager.GetRolesAsync(user);
-                var newAccessToken = _tokenService.GenerateAccessToken(user, roles);
-                var newRefreshToken = _tokenService.GenerateRefreshToken(user.Id);
-
-                // Store new refresh token as separate entity
-                await _unitOfWork.RefreshTokens.AddAsync(newRefreshToken);
-                await _unitOfWork.CommitAsync();
-
-                return Result<AuthenticationTokens>.Success(new AuthenticationTokens
-                {
-                    AccessToken = newAccessToken,
-                    RefreshToken = newRefreshToken.Token,
-                    AccessTokenExpiration = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes)
-                });
+                return await GenerateAuthResponseAsync(user);
             }
             catch (Exception ex)
             {

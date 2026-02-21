@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authentication;
+
 using Application.DTOs.Authentication.Requests;
 using Application.DTOs.Authentication.Responses;
 using Application.Interfaces.IServices;
@@ -68,15 +68,8 @@ namespace API.Controllers
         [HttpPost("google")]
         public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest request)
         {
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,                                // Cannot be accessed by JavaScript (XSS protection)
-                Secure = true,                                  // Only sent over HTTPS
-                SameSite = SameSiteMode.Strict,                 // CSRF protection
-                Expires = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays) // Match refresh token expiration from settings
-            };
-
-            Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+            var result = await _authenticationService.GoogleLoginAsync(request);
+            return ToActionResult(result);
         }
     }
 }
